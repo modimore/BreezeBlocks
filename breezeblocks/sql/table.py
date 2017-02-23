@@ -17,7 +17,7 @@ class Table(_TableExpr):
         
         # Construct table's qualified name
         if schema is not None:
-            self.name = '.'.join([schema, name])
+            self.name = '.'.join([schema, table_name])
         else:
             self.name = table_name
         
