@@ -1,8 +1,7 @@
 from .pool import ConnectionPool as Pool
 
-from .sql.table import Table
-from .sql.column import Column
-from .sql.query import Query
+from .sql import Table
+from .sql import Query
 
 class Database(object):
     """Proxies the database at the URI provided."""

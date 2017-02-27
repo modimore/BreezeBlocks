@@ -6,5 +6,4 @@ such as tables and columns, as well as the expressions allowed in
 queries.
 """
 from .table import Table
-from .column import Column
 from .query import Query

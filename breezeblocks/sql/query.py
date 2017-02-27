@@ -1,5 +1,5 @@
 from .table import _TableExpr
-from .column import _ColumnBase, ColumnExpr
+from .column import _BaseColumnExpr
 
 from .abc import Queryable
 
@@ -42,17 +42,14 @@ class Query(object):
     
     def select(self, *args):
         for arg in args:
-            if isinstance(arg, ColumnExpr):
+            if isinstance(arg, _BaseColumnExpr):
                 self._output_exprs.append(arg)
-                self._relations.append(self._col.table)
+                self._relations.add(arg.table)
             elif isinstance(arg, Queryable):
                 self._output_exprs.append(arg)
-            elif isinstance(arg, _ColumnBase):
-                self._output_exprs.append(ColumnExpr(arg))
-                self._relations.add(arg.table)
             elif isinstance(arg, _TableExpr):
-                for col in arg._columns:
-                    self._output_exprs.append(ColumnExpr(col))
+                for col in arg._column_names:
+                    self._output_exprs.append(arg[col])
                 self._relations.add(arg)
             else:
                 raise QueryError(arg)
