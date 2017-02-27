@@ -78,6 +78,9 @@ class _AliasedOperatorExpr(object):
         return '{} AS {}'.format(
             self._operator._get_ref_field(), self._alias)
     
+    def _get_params(self):
+        return self._operator._get_params()
+    
     def _get_tables(self):
         return self._operator._get_tables()
 
@@ -149,7 +152,7 @@ class Is_(_BinaryOperator):
     """SQL 'IS' operator"""
     def _get_ref_field(self):
         return '({}) IS ({})'.format(
-			self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class IsNull_(_UnaryOperator):
     """SQL 'IS NULL' operator"""
@@ -165,39 +168,78 @@ class Equal_(_BinaryOperator):
     """SQL '=' operator"""
     def _get_ref_field(self):
         return '({}) = ({})'.format(
-			self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class NotEqual_(_BinaryOperator):
     """SQL '!=' or '<>' operator"""
     def _get_ref_field(self):
         return '({}) <> ({})'.format(
-			self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class LessThan_(_BinaryOperator):
     """SQL '<' operator"""
     def _get_ref_field(self):
         return '({}) < ({})'.format(
-			self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class GreaterThan_(_BinaryOperator):
     """SQL '>' operator"""
     def _get_ref_field(self):
         return '({}) > ({})'.format(
-			self._lhs._get_ref_field(), self._rhs._get_ref_field())
+                self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class LessThanEqual_(_BinaryOperator):
     """SQL '<=' operator"""
     def _get_ref_field(self):
         return '({}) <= ({})'.format(
-			self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class GreaterThanEqual_(_BinaryOperator):
     """SQL '>=' operator"""
     def _get_ref_field(self):
         return '({}) >= ({})'.format(
-			self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
-# BETWEEN IN LIKE ILIKE SIMILAR
+class In_(_BinaryOperator):
+    def _get_ref_field(self):
+        return '({}) IN ({})'.format(
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
+
+class Between_(_OperatorExpr):
+    def __init__(self, comp_expr, low, high):
+        self._comp_expr = comp_expr
+        self._low = low
+        self._high = high
+    
+    def _get_ref_field(self):
+        return '({}) BETWEEN ({}) and ({})'.format(
+            self._comp_expr._get_ref_field(),
+            self._low._get_ref_field()
+            self._high._get_ref_field())
+    
+    def _get_params(self):
+        params = []
+        params.extend(self._comp_expr._get_params())
+        params.extend(self._low._get_params())
+        params.extend(self._high._get_params())
+        return params
+    
+    def _get_tables(self):
+        tables = set()
+        tables.update(self._comp_expr._get_params())
+        tables.update(self._low._get_params())
+        tables.update(self._high._get_params())
+        return tables
+
+class Like_(_BinaryOperator):
+    def _get_ref_field(self):
+        return '({}) LIKE ({})'.format(
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
+
+class SimilarTo_(_BinaryOperator):
+    def _ref_field(self):
+        return '({}) SIMILAR TO ({})'.format(
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 # (any other operator)
 
@@ -211,7 +253,7 @@ class Minus_(_BinaryOperator):
     """SQL '-' operator"""
     def _get_ref_field(self):
         return '({}) - ({})'.format(
-			self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class Mult_(_ChainableOperator):
     """SQL '*' operator"""
@@ -223,19 +265,19 @@ class Div_(_BinaryOperator):
     """SQL '/' operator"""
     def _get_ref_field(self):
         return '({}) / ({})'.format(
-			self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class Mod_(_BinaryOperator):
     """SQL '%' operator"""
     def _get_ref_field(self):
         return '({}) % ({})'.format(
-			self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class Exp_(_BinaryOperator):
     """SQL '^' operator"""
     def _get_ref_field(self):
         return '({}) ^ ({})'.format(
-			self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class UnaryPlus_(_UnaryOperator):
     """SQL Unary '+' operator"""
