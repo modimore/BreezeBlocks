@@ -1,7 +1,5 @@
-from .table import _TableExpr
-from .column import _BaseColumnExpr
-
 from .abc import Queryable
+from .table import _TableExpr
 
 class QueryError(Exception):
     def __init__(self, value):
@@ -42,11 +40,9 @@ class Query(object):
     
     def select(self, *args):
         for arg in args:
-            if isinstance(arg, _BaseColumnExpr):
+            if isinstance(arg, Queryable):
                 self._output_exprs.append(arg)
-                self._relations.add(arg.table)
-            elif isinstance(arg, Queryable):
-                self._output_exprs.append(arg)
+                self._relations.update(arg._get_tables())
             elif isinstance(arg, _TableExpr):
                 for col in arg._column_names:
                     self._output_exprs.append(arg[col])
@@ -73,6 +69,7 @@ class Query(object):
         for cond in args:
             if isinstance(cond, Queryable):
                 self._where_conditions.append(cond)
+                self._relations.update(cond._get_tables())
             else:
                 raise QueryError(cond)
         
@@ -113,24 +110,24 @@ class Query(object):
         query_buffer.write('SELECT\n\t')
         query_buffer.write(
             ',\n\t'.join(
-                e.select_field() for e in self._output_exprs))
+                e._get_select_field() for e in self._output_exprs))
         for expr in self._output_exprs:
-            self._stmt_params.extend(expr.get_params())
+            self._stmt_params.extend(expr._get_params())
         
         # Construct the 'FROM' portion
         query_buffer.write('\nFROM\n\t')
         query_buffer.write(
             ',\n\t'.join(
-                t.from_field() for t in self._relations))
+                t._get_from_field() for t in self._relations))
         
         # Construct the 'WHERE' portion, if used
         if len(self._where_conditions) > 0:
             query_buffer.write('\nWHERE ')
             query_buffer.write(
                 '\n  AND '.join(
-                    cond.ref_field() for cond in self._where_conditions))
+                    cond._get_ref_field() for cond in self._where_conditions))
             for cond in self._where_conditions:
-                self._stmt_params.extend(cond.get_params())
+                self._stmt_params.extend(cond._get_params())
         
         self._stmt = query_buffer.getvalue()
     

@@ -20,19 +20,22 @@ class _Expr(object):
     def __init__(self):
         raise NotImplementedError()
     
-    def ref_field(self):
+    def _get_ref_field(self):
         raise NotImplementedError()
     
-    def select_field(self):
+    def _get_select_field(self):
         raise NotImplementedError()
     
-    def get_params(self):
+    def _get_params(self):
         """Returns a tuple of the parameters of this expression.
         
         For most expressions this will be an empty tuple, so this
         does not need to be overridden.
         """
         return tuple()
+    
+    def _get_tables(self):
+        raise NotImplementedError()
     
     def as_(self, alias):
         """Returns an aliased version of this expression."""
@@ -87,22 +90,25 @@ class _AliasedExpr(object):
     """An expression using an alias to change its visible name.
     
     The underlying expression can be anything deriving from
-    :class:`_Expr` and providing a :meth:`ref_field` method that
+    :class:`_Expr` and providing a :meth:`_ref_field` method that
     returns a string.
     """
     def __init__(self, expr, alias):
         self._expr = expr
         self.name = alias
     
-    def ref_field(self):
-        return self._expr.ref_field()
+    def _get_ref_field(self):
+        return self._expr._get_ref_field()
     
-    def select_field(self):
+    def _get_select_field(self):
         return '{} AS {!s}'.format(
-            self._expr.ref_field(), self.name)
+            self._expr._get_ref_field(), self.name)
     
-    def get_params(self):
-        return self._expr.get_params()
+    def _get_params(self):
+        return self._expr._get_params()
+    
+    def _get_tables(self):
+        return self._expr._get_tables()
 
 class ConstantExpr(_Expr):
     """A constant value or literal for safe use in a query.
@@ -115,21 +121,24 @@ class ConstantExpr(_Expr):
         """Sets value equal to the provided value."""
         self._value = value
     
-    def ref_field(self):
+    def _get_ref_field(self):
         """Implemented in derived classes.
         
         Should return a string for use in queries."""
         raise NotImplementedError()
     
-    def select_field(self):
+    def _get_select_field(self):
         """Implemented in derived classes.
         
         Should return a string for use in a query.
         """
         raise NotImplementedError()
     
-    def get_params(self):
+    def _get_params(self):
         return (self._value,)
+    
+    def _get_tables(self):
+        return set()
 
 Queryable.register(_Expr)
 Queryable.register(_AliasedExpr)

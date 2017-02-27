@@ -5,7 +5,7 @@ class _TableExpr(object):
     def __init__(self):
         raise NotImplementedError()
     
-    def from_field(self):
+    def _get_from_field(self):
         raise NotImplementedError()
 
 class Table(_TableExpr):
@@ -47,7 +47,7 @@ class Table(_TableExpr):
         else:
             raise TypeError('Tables require strings for lookup keys.')
     
-    def from_field(self):
+    def _get_from_field(self):
         return self.name
     
     def as_(self, alias):
@@ -80,7 +80,7 @@ class AliasedTable(_TableExpr):
         else:
             raise TypeError('Tables require strings for lookup keys.')
     
-    def from_field(self):
+    def _get_from_field(self):
         """Returns the appropriate from field for queries.
         
         This field includes both the table's original from field and the
