@@ -17,6 +17,7 @@ class _Expr(object):
     Python-intuitive value, but an operation from operators
     that can be used in query-building.
     """
+    
     def __init__(self):
         raise NotImplementedError()
     
@@ -93,6 +94,7 @@ class _AliasedExpr(object):
     :class:`_Expr` and providing a :meth:`_ref_field` method that
     returns a string.
     """
+    
     def __init__(self, expr, alias):
         self._expr = expr
         self.name = alias
@@ -117,6 +119,7 @@ class ConstantExpr(_Expr):
     the needed DBAPI param style. Instantiate a subclass overriding
     `__str__` instead.
     """
+    
     def __init__(self, value):
         """Sets value equal to the provided value."""
         self._value = value

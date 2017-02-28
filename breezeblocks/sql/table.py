@@ -2,6 +2,7 @@ from .column import ColumnExpr
 
 class _TableExpr(object):
     """A table expression for use in BreezeBlocks queries."""
+    
     def __init__(self):
         raise NotImplementedError()
     
@@ -10,6 +11,7 @@ class _TableExpr(object):
 
 class Table(_TableExpr):
     """Represents a database table."""
+    
     def __init__(self, table_name, column_names, schema=None):
         """Initializes a table."""
         # Construct table's qualified name
@@ -24,17 +26,23 @@ class Table(_TableExpr):
             name: ColumnExpr(name, self) for name in self._column_names}
     
     def __hash__(self):
-        """Hashing is done on the qualified name of tables.
+        """Calculates a hash value for this table.
+        
+        Hash is generated from the table's qualifed name.
         
         qualifed_name := [schema_name '.'] table_name
+        
+        :return: The computed hash value.
         """
         return hash(self.name)
     
     def __eq__(self, other):
         """Checks for equality with another table.
         
-        If this other object is not another table, this returns false.
-        Tables are only compared by qualifed name.
+        :param other: The object to compare with this. If it is a table,
+          their names are compared. If not, the comparison returns false.
+        
+        :return: A boolean representing whether the two objects are equal.
         """
         if isinstance(other, Table):
             return self.name == other.name
@@ -55,6 +63,7 @@ class Table(_TableExpr):
 
 class AliasedTable(_TableExpr):
     """A table that has been given an alias for use in queries."""
+    
     def __init__(self, table, alias):
         """Initializes an aliased table from a table and an alias."""
         self.table = table

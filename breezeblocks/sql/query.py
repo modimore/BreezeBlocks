@@ -21,7 +21,6 @@ class Query(object):
         :param select_args: Any remaining arguments are consumed and
           passed to :meth:`select` for processing.
         """
-        
         if db is None:
             raise QueryError('Attempting to query without a database.')
         
@@ -39,6 +38,14 @@ class Query(object):
         self.select(*select_args)
     
     def select(self, *args):
+        """Adds expressions to the select clause of this query.
+        
+        :param args: Each argument should be a queryable expression.
+          The only other possible argument is a table-like argument,
+          from which all rows are to be selected.
+        
+        :return: `self` for method chaining.
+        """
         for arg in args:
             if isinstance(arg, Queryable):
                 self._output_exprs.append(arg)
@@ -53,6 +60,13 @@ class Query(object):
         return self
     
     def from_(self, *args):
+        """Adds table expressions to the from clause of a query.
+        
+        :param args: Each argument must be a table or a table-like expression
+          to be added to the from clause.
+        
+        :return: `self` for method chaining.
+        """
         for arg in args:
             if isinstance(expr, _TableExpr):
                 self._relation.add(arg.table)
@@ -62,9 +76,12 @@ class Query(object):
         return self
     
     def where(self, *args):
-        """Adds condition to the where clause of a query.
+        """Adds conditions to the where clause of a query.
         
-        Returns `self` for method chaining.
+        :param args: Each argument should be an expression that will result in
+          a boolean value when the generated SQL is executed.
+        
+        :return: `self` for method chaining.
         """
         for cond in args:
             if isinstance(cond, Queryable):
@@ -142,6 +159,7 @@ class Query(object):
         return self._return_type._make(r)
     
     def execute(self):
+        """Build and execute this query with the fields provided."""
         self._construct_sql()
         self._construct_return_type()
         results = []
@@ -154,6 +172,7 @@ class Query(object):
         return [ self._process_result(r) for r in results ]
     
     def show(self):
+        """Show the constructed SQL statement for this query."""
         self._construct_sql()
         
         print(self._stmt)

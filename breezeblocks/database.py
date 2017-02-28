@@ -20,11 +20,14 @@ class Database(object):
         self._tables = {}
     
     def query(self, *queryables):
+        """Starts defining a query in the database.
+        
+        Any arguments should be selectable expressions, such as columns or
+        values that should end up in the result rows of the query.
+        """
         return Query(self, *queryables)
     
     def connect(self):
-        """Returns a new connection to the database.
-        
-        The returned connection is not from the connection pool."""
+        """Returns a new connection to the database."""
         return self._dbapi.connect(self._dsn,
             *self._connection_args, **self._connection_kwargs)

@@ -3,6 +3,7 @@ from .expressions import _Expr
 
 class ColumnExpr(_Expr):
     """Represents a database column."""
+    
     def __init__(self, name, table):
         """Initializes a column.
         
@@ -38,6 +39,7 @@ class ColumnExpr(_Expr):
 
 class AliasedColumnExpr(_Expr):
     """A column with an alias used in querying."""
+    
     def __init__(self, alias, column):
         """Initializes an aliased column from an existing column.
         
