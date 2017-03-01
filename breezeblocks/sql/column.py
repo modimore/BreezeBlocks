@@ -1,7 +1,7 @@
 """Provides a column class and an expression for using columns in queries."""
-from .expressions import _Expr
+from .expressions import _ValueExpr
 
-class ColumnExpr(_Expr):
+class ColumnExpr(_ValueExpr):
     """Represents a database column."""
     
     def __init__(self, name, table):
@@ -37,7 +37,7 @@ class ColumnExpr(_Expr):
         """
         return AliasedColumnExpr(alias, self)
 
-class AliasedColumnExpr(_Expr):
+class AliasedColumnExpr(_ValueExpr):
     """A column with an alias used in querying."""
     
     def __init__(self, alias, column):

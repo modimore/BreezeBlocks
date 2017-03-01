@@ -1,15 +1,7 @@
+from .query_components import TableExpression
 from .column import ColumnExpr
 
-class _TableExpr(object):
-    """A table expression for use in BreezeBlocks queries."""
-    
-    def __init__(self):
-        raise NotImplementedError()
-    
-    def _get_from_field(self):
-        raise NotImplementedError()
-
-class Table(_TableExpr):
+class Table(TableExpression):
     """Represents a database table."""
     
     def __init__(self, table_name, column_names, schema=None):
@@ -58,10 +50,13 @@ class Table(_TableExpr):
     def _get_from_field(self):
         return self.name
     
+    def _get_selectables(self):
+        return tuple(self._column_exprs[k] for k in self._column_names)
+    
     def as_(self, alias):
         return AliasedTable(self, alias)
 
-class AliasedTable(_TableExpr):
+class AliasedTable(TableExpression):
     """A table that has been given an alias for use in queries."""
     
     def __init__(self, table, alias):
@@ -97,3 +92,6 @@ class AliasedTable(_TableExpr):
         """
         return '{} AS {}'.format(
             self.table.name, self.name)
+    
+    def _get_selectables(self):
+        return tuple(self._column_exprs[k] for k in self._column_names)
