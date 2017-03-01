@@ -99,11 +99,14 @@ class _AliasedExpr(Selectable):
     
     def __init__(self, expr, alias):
         self._expr = expr
-        self.name = alias
+        self._alias = alias
+    
+    def _get_name(self):
+        return self._alias
     
     def _get_select_field(self):
         return '{} AS {!s}'.format(
-            self._expr._get_ref_field(), self.name)
+            self._expr._get_ref_field(), self._alias)
     
     def _get_params(self):
         return self._expr._get_params()
@@ -123,10 +126,15 @@ class ConstantExpr(_ValueExpr):
         """Sets value equal to the provided value."""
         self._value = value
     
+    def _get_name(self):
+        """Constant expressions do not have names."""
+        return None
+    
     def _get_ref_field(self):
         """Implemented in derived classes.
         
-        Should return a string for use in queries."""
+        Should return a string for use in queries.
+        """
         raise NotImplementedError()
     
     def _get_select_field(self):
@@ -150,11 +158,16 @@ class _Operator(_ValueExpr):
     def __init__(self):
         raise NotImplementedError()
     
+    def _get_name(self):
+        """Operators do not have names."""
+        return None
+    
     def _get_ref_field(self):
         raise NotImplementedError()
     
     def _get_select_field(self):
-        return self.as_('_')._get_select_field()
+        """Selecting operators without aliases uses the reference field."""
+        return self._get_ref_field()
     
     def _get_params(self):
         raise NotImplementedError()

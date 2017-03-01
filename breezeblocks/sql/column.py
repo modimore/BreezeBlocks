@@ -16,15 +16,17 @@ class ColumnExpr(_ValueExpr):
         self.table = table
         self.full_name = '.'.join([table.name, self.name])
     
+    def _get_name(self):
+        """Provides the unqualifed column name as the select field name."""
+        return self.name
+    
     def _get_ref_field(self):
         """Returns a way to reference this column in a query."""
         return self.full_name
     
     def _get_select_field(self):
-        """Returns the expression for selecting this column in a
-        query."""
-        return '{} AS {}'.format(
-            self.full_name, self.name)
+        """Returns the expression for selecting this column in a query."""
+        return self.full_name
     
     def _get_tables(self):
         """Returns a set containing the table this column is from."""
@@ -48,12 +50,15 @@ class AliasedColumnExpr(_ValueExpr):
         :param column: The :class:`Column` that this is going to reference.
         """
         self.column = column
-        self.name = alias
+        self._alias = alias
     
     @property
     def full_name(self):
         """Returns the full name of the underlying column."""
         return self.column.full_name
+    
+    def _get_name(self):
+        return self._alias
     
     def _get_ref_field(self):
         """Returns a way to reference this column in a query."""
@@ -63,7 +68,7 @@ class AliasedColumnExpr(_ValueExpr):
         """Returns the expression for selecting this column in a
         query."""
         return '{} AS {}'.format(
-            self.full_name, self.name)
+            self.full_name, self._alias)
     
     def _get_tables(self):
         return self.column._get_tables()

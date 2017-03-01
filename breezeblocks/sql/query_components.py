@@ -40,6 +40,19 @@ class Referenceable(object):
 class Selectable(object):
     """An object that can be used as a select field in a SQL query."""
     
+    def _get_name(self):
+        """Should return a identifier to reference this field by.
+        
+        There are values that can be provided to make the query itself generate
+        a name for the field.
+        Currently, valid names start with an any alphabetic character and do
+        not clash with any Python keywords. All invalid field names will be
+        replaced in the query result object.
+        Specifically, query return types are namedtuples created as such:
+        return_type = namedtuple(type_name, type_fields, rename=True)
+        """
+        raise NotImplementedError()
+    
     def _get_select_field(self):
         """Should return a string describing this item for the select clause."""
         raise NotImplementedError()

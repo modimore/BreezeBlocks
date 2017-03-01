@@ -193,7 +193,7 @@ class Query(object):
     def _construct_return_type(self):
         from collections import namedtuple
         
-        fields = (f.name for f in self._output_exprs)
+        fields = (f._get_name() for f in self._output_exprs)
         
         self._return_type = namedtuple('QueryResult_'+str(id(self)), fields, rename=True)
     
