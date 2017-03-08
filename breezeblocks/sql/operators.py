@@ -1,6 +1,6 @@
 """Provides access to class representations of SQL operators.
 
-Many of these are actually implemented in :module:`expressions`
+Many of these are actually implemented in :mod:`breezeblocks.sql.expressions`
 because their functionality is used in certain Python operators
 on expressions. They are imported here for convenience anyway.
 """
@@ -20,46 +20,46 @@ from .expressions import Plus_, Minus_, Mult_, Div_, Mod_, Exp_
 from .expressions import UnaryPlus_, UnaryMinus_
 
 class Or_(_ChainableOperator):
-    """SQL 'OR' operator."""
+    """SQL `OR` operator."""
     
     def _get_ref_field(self):
         return ' OR '.join(
             ['({})'.format(expr._get_ref_field()) for expr in self._operands])
 
 class And_(_ChainableOperator):
-    """SQL 'AND' operator."""
+    """SQL `AND` operator."""
     
     def _get_ref_field(self):
         return ' AND '.join(
             ['({})'.format(expr._get_ref_field()) for expr in self._operands])
 
 class Not_(_UnaryOperator):
-    """SQL 'NOT' operator."""
+    """SQL `NOT` operator."""
     
     def _get_ref_field(self):
         return 'NOT ({})'.format(self._operand._get_ref_field())
 
 class Is_(_BinaryOperator):
-    """SQL 'IS' operator."""
+    """SQL `IS` operator."""
     
     def _get_ref_field(self):
         return '({}) IS ({})'.format(
             self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class IsNull_(_UnaryOperator):
-    """SQL 'IS NULL' operator."""
+    """SQL `IS NULL` operator."""
     
     def _get_ref_field(self):
-        return '({} IS NULL)'.format(self._operand._get_ref_field())
+        return '({}) IS NULL'.format(self._operand._get_ref_field())
 
 class NotNull_(_UnaryOperator):
-    """SQL 'IS NOT NULL' operator."""
+    """SQL `IS NOT NULL` operator."""
     
     def _get_ref_field(self):
         return '({}) IS NOT NULL'.format(self._operand._get_ref_field())
 
 class In_(_BinaryOperator):
-    """SQL 'IN' operator."""
+    """SQL `IN` operator."""
     
     def _get_ref_field(self):
         return '({}) IN ({})'.format(
@@ -77,7 +77,7 @@ class Between_(_Operator):
         self._high = high
     
     def _get_ref_field(self):
-        return '({}) BETWEEN ({}) and ({})'.format(
+        return '({}) BETWEEN ({}) AND ({})'.format(
             self._comp_expr._get_ref_field(),
             self._low._get_ref_field(),
             self._high._get_ref_field())
@@ -97,7 +97,7 @@ class Between_(_Operator):
         return tables
 
 class Like_(_BinaryOperator):
-    """SQL 'LIKE' operator.
+    """SQL `LIKE` operator.
     
     Performs a string comparison with support for two wildcards.
     """
@@ -107,7 +107,7 @@ class Like_(_BinaryOperator):
             self._lhs._get_ref_field(), self._rhs._get_ref_field())
 
 class SimilarTo_(_BinaryOperator):
-    """SQL 'SIMILAR TO' operator.
+    """SQL `SIMILAR TO` operator.
     
     Performs a string comparison with a string in a regex-like syntax as the
     second argument.

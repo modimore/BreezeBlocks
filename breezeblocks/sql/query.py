@@ -8,17 +8,12 @@ class Query(object):
     """Represents a database query."""
     
     def __init__(self, db=None, *select_args):
-        """Creates a query from a list of relations and fields.
+        """Initializes a query against a specific database.
         
-        Relations should be valid table expressions.
-        From a relation, all fields will be selected.
+        :param db: The database to perform the query on.
         
-        Fields should be valid value expressions.
-        
-        :param db: A database object that connections can be gotten from.
-        
-        :param select_args: Any remaining arguments are consumed and
-          passed to :meth:`select` for processing.
+        :param select_args: Any remaining arguments.
+          These will be passed to :meth:`select` for processing.
         """
         if db is None:
             raise QueryError('Attempting to query without a database.')
@@ -48,46 +43,46 @@ class Query(object):
         
         :return: `self` for method chaining.
         """
-        for arg in args:
-            if isinstance(arg, Selectable):
-                self._output_exprs.append(arg)
-                self._relations.update(arg._get_tables())
-            elif isinstance(arg, TableExpression):
-                self._relations.add(arg)
+        for expr in args:
+            if isinstance(expr, Selectable):
+                self._output_exprs.append(expr)
+                self._relations.update(expr._get_tables())
+            elif isinstance(expr, TableExpression):
+                self._relations.add(expr)
                 self._output_exprs.extend(
-                    arg._get_selectables())
+                    expr._get_selectables())
             else:
-                raise QueryError('Invalid select argument - {!r}'.format(arg))
+                raise QueryError('Invalid select argument - {!r}'.format(expr))
         
         return self
     
-    def from_(self, *args):
+    def from_(self, *table_exprs):
         """Adds table expressions to the from clause of a query.
         
-        :param args: All arguments provided to the method.
+        :param table_exprs: All arguments provided to the method.
           Each argument must be a table or a table-like expression to be added
           to the from clause.
         
         :return: `self` for method chaining.
         """
-        for arg in args:
-            if isinstance(arg, TableExpression):
-                self._relation.add(arg.table)
+        for expr in table_exprs:
+            if isinstance(expr, TableExpression):
+                self._relation.add(expr.table)
             else:
-                raise QueryError('Invalid from argument - {!r}'.format(arg))
+                raise QueryError('Invalid from argument - {!r}'.format(expr))
         
         return self
     
-    def where(self, *args):
+    def where(self, *conditions):
         """Adds conditions to the where clause of a query.
         
-        :param args: All arguments provided to the method.
+        :param conditions: All arguments provided to the method.
           Each argument should be an expression that will result in a boolean
           value when the generated SQL is executed.
         
         :return: `self` for method chaining.
         """
-        for cond in args:
+        for cond in conditions:
             if isinstance(cond, Referenceable):
                 self._where_conditions.append(cond)
                 self._relations.update(cond._get_tables())
@@ -96,35 +91,35 @@ class Query(object):
         
         return self
     
-    def group_by(self, *args):
+    def group_by(self, *column_exprs):
         """Sets a grouping for returned records.
         
-        :param args: All arguments provided to the method.
+        :param column_exprs: All arguments provided to the method.
           Each argument should be a column expression by which rows in the
           output expression can be grouped.
          
         :return: `self` for method chaining.
         """
-        for arg in args:
-            if isinstance(arg, Referenceable):
-                self._group_exprs.append(arg)
+        for expr in column_exprs:
+            if isinstance(expr, Referenceable):
+                self._group_exprs.append(expr)
             else:
-                raise QueryError('Invalid group by argument - {!r}'.format(arg))
+                raise QueryError('Invalid group by argument - {!r}'.format(expr))
         
         return self
     
-    def having(self, *args):
+    def having(self, *conditions):
         """Adds conditions to the HAVING clause of a query.
         
         Used for filtering conditions that should be applied after grouping.
         
-        :param args: All arguments provided to the method.
+        :param conditions: All arguments provided to the method.
           Each argument should be an expression that will result in a boolean
           value when the generated SQL is executed.
         
         :return: `self` for method chaining.
         """
-        for cond in args:
+        for cond in conditions:
             if isinstance(arg, Referenceable):
                 self._having_conditions.append(cond)
             else:
