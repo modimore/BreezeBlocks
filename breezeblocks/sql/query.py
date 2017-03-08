@@ -4,8 +4,12 @@ from .query_components import Selectable
 
 from ..exceptions import QueryError
 
-class Query(object):
-    """Represents a database query."""
+class Query(TableExpression):
+    """Represents a database query.
+    
+    This can be used to build queries and also as a table expression for
+    use in other queries.
+    """
     
     def __init__(self, db=None, *select_args):
         """Initializes a query against a specific database.
@@ -29,6 +33,9 @@ class Query(object):
         
         self._stmt = None
         self._stmt_params = None
+        
+        self._fields = None
+        self._column_exprs = None
         self._return_type = None
         
         self.select(*select_args)
@@ -183,14 +190,32 @@ class Query(object):
         # Assign the resulting statement to the statement member.
         self._stmt = query_buffer.getvalue()
     
+    def _construct_fields(self):
+        self._fields = (f._get_name() for f in self._output_exprs)
+    
     def _construct_return_type(self):
+        """Constructs the return type for a query based on its select fields."""
+        if self._return_type is not None:
+            return
+        
         from collections import namedtuple
         
-        fields = (f._get_name() for f in self._output_exprs)
+        if self._fields is None:
+            self._fields = (f._get_name() for f in self._output_exprs)
         
-        self._return_type = namedtuple('QueryResult_'+str(id(self)), fields, rename=True)
+        self._return_type = namedtuple('QueryResult_'+str(id(self)),
+            self._fields, rename=True)
     
+    def _construct_columns(self):
+        if self._fields is None:
+            self._construct_fields()
+        
+        self._column_exprs = {
+            f._get_name(): f for f in self._output_exprs}
+        
+        
     def _process_result(self, r):
+        """Constructs an object of the correct return type from a result row."""
         return self._return_type._make(r)
     
     def execute(self):
@@ -212,3 +237,62 @@ class Query(object):
         
         print(self._stmt)
         print(self._stmt_params)
+    
+    def __getitem__(self, key):
+        if self._column_exprs is None:
+            self._construct_columns
+        
+        if isinstance(key, str):
+            return self._column_exprs[key]
+        else:
+            raise TypeError('Tables require strings for lookup keys.')
+    
+    def _get_from_field(self):
+        self._construct_sql()
+        return self._stmt
+    
+    def _get_selectables(self):
+        if self._column_exprs is None:
+            self._construct_columns()
+        
+        return tuple(self._column_exprs[k] for k in self._fields)
+
+class AliasedQuery(TableExpression):
+    """A finalized query that has been given its own alias.
+    
+    This class is only for use as a table expression in other queries.
+    """
+    
+    def __init__(self, query, alias):
+        from .column import ColumnExpr
+        
+        self._query = query
+        self._alias = alias
+        
+        if query._fields is None:
+            query._construct_fields()
+        
+        self._fields = query._fields
+        self._column_exprs = {
+            name: ColumnExpr(name, self) for name in self._fields}
+    
+    def __hash__(self):
+        return hash((self._alias, self._query))
+    
+    def __eq__(self, other):
+        if isinstance(other, AliasedQuery):
+            return self._alias == other._alias and self._query == other._query
+        else:
+            return False
+    
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            return self._column_exprs[key]
+        else:
+            raise TypeError('Tables require strings for lookup keys.')
+    
+    def _get_from_field(self):
+        return '{} AS {}'.format(self._query._get_from_field(), self._alias)
+    
+    def _get_selectables(self):
+        return tuple(self._column_exprs[k] for k in self._fields)
