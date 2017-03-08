@@ -19,6 +19,17 @@ from .expressions import Plus_, Minus_, Mult_, Div_, Mod_, Exp_
 # Unary Arithmetic operators
 from .expressions import UnaryPlus_, UnaryMinus_
 
+class _SubqueryOperator(_Operator):
+    def __init__(self, l_expr, r_query):
+        self._l_expr = l_expr
+        self._r_query = r_query
+    
+    def _get_tables(self):
+        return self._l_expr._get_tables()
+    
+    def _get_params(self):
+        return self._l_expr._get_params()
+
 class Or_(_ChainableOperator):
     """SQL `OR` operator."""
     
@@ -58,12 +69,12 @@ class NotNull_(_UnaryOperator):
     def _get_ref_field(self):
         return '({}) IS NOT NULL'.format(self._operand._get_ref_field())
 
-class In_(_BinaryOperator):
+class In_(_SubqueryOperator):
     """SQL `IN` operator."""
     
     def _get_ref_field(self):
         return '({}) IN ({})'.format(
-            self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._l_expr._get_ref_field(), self._r_query._get_from_field())
 
 class Between_(_Operator):
     """SQL `BETWEEN` operator.
