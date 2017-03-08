@@ -2,9 +2,7 @@ from .query_components import TableExpression
 from .query_components import Referenceable
 from .query_components import Selectable
 
-class QueryError(Exception):
-    def __init__(self, value):
-        self._value = value
+from ..exceptions import QueryError
 
 class Query(object):
     """Represents a database query."""
@@ -59,7 +57,7 @@ class Query(object):
                 self._output_exprs.extend(
                     arg._get_selectables())
             else:
-                raise QueryError(arg)
+                raise QueryError('Invalid select argument - {!r}'.format(arg))
         
         return self
     
@@ -73,10 +71,10 @@ class Query(object):
         :return: `self` for method chaining.
         """
         for arg in args:
-            if isinstance(expr, TableExpression):
+            if isinstance(arg, TableExpression):
                 self._relation.add(arg.table)
             else:
-                raise QueryError(arg)
+                raise QueryError('Invalid from argument - {!r}'.format(arg))
         
         return self
     
@@ -94,7 +92,7 @@ class Query(object):
                 self._where_conditions.append(cond)
                 self._relations.update(cond._get_tables())
             else:
-                raise QueryError(cond)
+                raise QueryError('Invalid where argument - {!r}'.format(cond))
         
         return self
     
@@ -111,7 +109,7 @@ class Query(object):
             if isinstance(arg, Referenceable):
                 self._group_exprs.append(arg)
             else:
-                raise QueryError(cond)
+                raise QueryError('Invalid group by argument - {!r}'.format(arg))
         
         return self
     
@@ -130,7 +128,7 @@ class Query(object):
             if isinstance(arg, Referenceable):
                 self._having_conditions.append(cond)
             else:
-                raise QueryError(cond)
+                raise QueryError('Invalid having argument - {!r}'.format(cond))
         
         return self
     

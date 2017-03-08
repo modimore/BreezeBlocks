@@ -3,12 +3,17 @@ from .pool import ConnectionPool as Pool
 from .sql import Table
 from .sql import Query
 
+from .exceptions import MissingModuleError
+
 class Database(object):
     """Proxies the database at the URI provided."""
     def __init__(self, dsn, dbapi_module=None, *args,
             minconn=10, maxconn=20, **kwargs):
         self._dsn = dsn
         self._dbapi = dbapi_module
+        
+        if self._dbapi is None:
+            raise MissingModuleError()
         
         self._connection_args = args
         self._connection_kwargs = kwargs
