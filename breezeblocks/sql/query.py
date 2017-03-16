@@ -161,6 +161,8 @@ class Query(TableExpression):
         query_buffer.write(
             ',\n\t'.join(
                 t._get_from_field() for t in self._relations))
+        for t in self._relations:
+            self._stmt_params.extend(t._get_params())
         
         # Construct the 'WHERE' portion, if used.
         if len(self._where_conditions) > 0:
@@ -257,6 +259,11 @@ class Query(TableExpression):
             self._construct_columns()
         
         return tuple(self._column_exprs[k] for k in self._fields)
+    
+    def _get_params(self):
+        if self._stmt_params is None:
+            self._construct_sql()
+        return self._stmt_params
 
 class AliasedQuery(TableExpression):
     """A finalized query that has been given its own alias.
@@ -297,3 +304,6 @@ class AliasedQuery(TableExpression):
     
     def _get_selectables(self):
         return tuple(self._column_exprs[k] for k in self._fields)
+    
+    def _get_params(self):
+        return self._query._get_params()

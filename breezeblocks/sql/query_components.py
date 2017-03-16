@@ -18,6 +18,14 @@ class TableExpression(object):
     def _get_selectables(self):
         """Should return an iterable of the column expressions in this table."""
         raise NotImplementedError()
+    
+    def _get_params(self):
+        """Should return an iterable of all the parameters for this table.
+        
+        For physical tables in the database this will return nothing, but
+        for subqueries and the like this can produce non-empty lists.
+        """
+        raise NotImplementedError()
 
 class Referenceable(object):
     """An object that can be used as a reference field in a SQL query."""

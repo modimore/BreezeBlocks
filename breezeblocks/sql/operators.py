@@ -28,7 +28,10 @@ class _SubqueryOperator(_Operator):
         return self._l_expr._get_tables()
     
     def _get_params(self):
-        return self._l_expr._get_params()
+        result = []
+        result.extend(self._l_expr._get_params())
+        result.extend(self._r_query._get_params())
+        return result
 
 class Or_(_ChainableOperator):
     """SQL `OR` operator."""

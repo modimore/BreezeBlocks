@@ -53,6 +53,9 @@ class Table(TableExpression):
     def _get_selectables(self):
         return tuple(self._column_exprs[k] for k in self._column_names)
     
+    def _get_params(self):
+        return tuple()
+    
     def as_(self, alias):
         return AliasedTable(self, alias)
 
@@ -95,3 +98,6 @@ class AliasedTable(TableExpression):
     
     def _get_selectables(self):
         return tuple(self._column_exprs[k] for k in self._column_names)
+    
+    def _get_params(self):
+        return tuple()
