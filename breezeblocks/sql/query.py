@@ -224,10 +224,11 @@ class Query(TableExpression):
         self._construct_return_type()
         results = []
         
-        with self._db.pool.get() as conn,\
-                conn.cursor() as cur:
+        with self._db.pool.get() as conn:
+            cur = conn.cursor()
             cur.execute(self._stmt, tuple(self._stmt_params))
             results = cur.fetchall()
+            cur.close()
         
         return [ self._process_result(r) for r in results ]
     
