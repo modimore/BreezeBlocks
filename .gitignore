@@ -27,3 +27,18 @@ wheels/
 
 # Sphinx documentation
 docs/_build/
+
+# General virtualenv
+pip-selfcheck.json
+pyvenv.cfg
+
+# Windows virtualenv
+Include/
+Lib/
+Scripts/
+
+# Linus virtualenv
+bin/
+include/
+lib/
+
