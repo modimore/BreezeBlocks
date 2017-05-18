@@ -238,8 +238,8 @@ class Query(TableExpression):
         """Show the constructed SQL statement for this query."""
         self._construct_sql()
         
-        print((self._stmt))
-        print((self._stmt_params))
+        print(self._stmt)
+        print(self._stmt_params)
     
     def __getitem__(self, key):
         if self._column_exprs is None:
