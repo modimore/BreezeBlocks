@@ -74,7 +74,7 @@ class Query(TableExpression):
         """
         for expr in table_exprs:
             if isinstance(expr, TableExpression):
-                self._relation.add(expr.table)
+                self._relations.add(expr)
             else:
                 raise QueryError('Invalid from argument - {!r}'.format(expr))
         
@@ -203,7 +203,7 @@ class Query(TableExpression):
         from collections import namedtuple
         
         if self._fields is None:
-            self._fields = (f._get_name() for f in self._output_exprs)
+            self._construct_fields()
         
         self._return_type = namedtuple('QueryResult_'+str(id(self)),
             self._fields, rename=True)

@@ -100,4 +100,4 @@ class AliasedTable(TableExpression):
         return tuple(self._column_exprs[k] for k in self._column_names)
     
     def _get_params(self):
-        return tuple()
+        self.table._get_params()
