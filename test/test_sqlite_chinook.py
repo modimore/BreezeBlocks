@@ -1,7 +1,7 @@
 import unittest
 import sqlite3
 from breezeblocks import Database, Table
-from breezeblocks.sql.operators import In_
+from breezeblocks.sql.operators import Equal_, In_
 from breezeblocks.sql.values import QmarkStyleValue as Value
 
 import os
@@ -79,3 +79,21 @@ class SQLiteChinookTests(unittest.TestCase):
         # clause have not been implemented.
         # However, the query running without error is important to test.
         q.execute()
+    
+    def test_selectFromQuery(self):
+        tbl_album = self.tables['Album']
+        tbl_artist = self.tables['Artist']
+        
+        artist_id = self.db.query(tbl_artist.getColumn('ArtistId'))\
+            .where(Equal_(tbl_artist.getColumn('Name'), Value('Queen')))\
+            .execute()[0].ArtistId
+        
+        inner_q = self.db.query(tbl_album.getColumn('ArtistId'), tbl_album.getColumn('Title'))\
+            .where(Equal_(tbl_album.getColumn('ArtistId'), Value(artist_id)))
+        
+        q = self.db.query(inner_q.as_('q'))
+        
+        for row in q.execute():
+            self.assertTrue(hasattr(row, 'ArtistId'))
+            self.assertTrue(hasattr(row, 'Title'))
+            self.assertEqual(artist_id, row.ArtistId)

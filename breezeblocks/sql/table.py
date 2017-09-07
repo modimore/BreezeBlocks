@@ -59,25 +59,25 @@ class Table(TableExpression):
     def as_(self, alias):
         return AliasedTable(self, alias)
 
-class AliasedTable(TableExpression):
-    """A table that has been given an alias for use in queries."""
+class AliasedTableExpression(TableExpression):
+    """A table expression that has been given an alias for use in queries."""
     
-    def __init__(self, table, alias):
+    def __init__(self, table_expr, alias):
         """Initializes an aliased table from a table and an alias."""
-        self.table = table
+        self._table_expr = table_expr
         self.name = alias
         
         # Add the underlying table's columns.
-        self._column_names = table._column_names
+        self._column_names = self._table_expr._column_names
         self._column_exprs = {
             name: ColumnExpr(name, self) for name in self._column_names}
     
     def __hash__(self):
-        return hash((self.name, self.table))
+        return hash((self.name, self._table_expr))
     
     def __eq__(self, other):
         if isinstance(other, AliasedTable):
-            return self.name == other.name and self.table == other.table
+            return self.name == other.name and self._table_expr == other._table_expr
         else:
             return False
     
@@ -94,10 +94,10 @@ class AliasedTable(TableExpression):
         new alias.
         """
         return '{} AS {}'.format(
-            self.table.name, self.name)
+            self._table_expr._get_from_field(), self.name)
     
     def _get_selectables(self):
         return tuple(self._column_exprs[k] for k in self._column_names)
     
     def _get_params(self):
-        self.table._get_params()
+        return self._table_expr._get_params()
