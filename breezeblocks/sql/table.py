@@ -57,7 +57,7 @@ class Table(TableExpression):
         return tuple()
     
     def as_(self, alias):
-        return AliasedTable(self, alias)
+        return AliasedTableExpression(self, alias)
 
 class AliasedTableExpression(TableExpression):
     """A table expression that has been given an alias for use in queries."""

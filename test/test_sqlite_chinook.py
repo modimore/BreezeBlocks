@@ -80,6 +80,22 @@ class SQLiteChinookTests(unittest.TestCase):
         # However, the query running without error is important to test.
         q.execute()
     
+    def test_aliasTable(self):
+        tbl_album = self.tables['Album']
+        tbl_artist = self.tables['Artist']
+        
+        artist_id = self.db.query(tbl_artist.getColumn('ArtistId'))\
+            .where(Equal_(tbl_artist.getColumn('Name'), Value('Queen')))\
+            .execute()[0].ArtistId
+        
+        musician = tbl_artist.as_('Musician')
+        q = self.db.query(musician).where(Equal_(musician.getColumn('ArtistId'), Value(artist_id)))
+        
+        for row in q.execute():
+            self.assertTrue(hasattr(row, 'ArtistId'))
+            self.assertTrue(hasattr(row, 'Name'))
+            self.assertEqual(artist_id, row.ArtistId)
+    
     def test_selectFromQuery(self):
         tbl_album = self.tables['Album']
         tbl_artist = self.tables['Artist']
