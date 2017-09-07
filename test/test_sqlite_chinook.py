@@ -34,8 +34,8 @@ class SQLiteChinookTests(unittest.TestCase):
     
     def test_columnQuery(self):
         """Tests a simple select on a column."""
-        q = self.db.query(self.tables['Artist']['Name'])
-        
+        q = self.db.query(self.tables['Artist'].getColumn('Name'))
+    
         # Assertion checks that only the queried columns are returned.
         for row in q.execute():
             self.assertTrue(hasattr(row, 'Name'))
@@ -46,37 +46,36 @@ class SQLiteChinookTests(unittest.TestCase):
         tbl_genre = self.tables['Genre']
         tbl_track = self.tables['Track']
         genre_id = self.db.query(tbl_genre)\
-            .where(tbl_genre['Name'] == Value('Alternative & Punk'))\
+            .where(tbl_genre.getColumn('Name') == Value('Alternative & Punk'))\
             .execute()[0].GenreId
-        
-        q = self.db.query(tbl_track['GenreId'])\
-                .where(tbl_track['GenreId'] == Value(genre_id))
-        
+    
+        q = self.db.query(tbl_track.getColumn('GenreId'))\
+                .where(tbl_track.getColumn('GenreId') == Value(genre_id))
+    
         # Assertion checks that the where condition has been applied to
         # the results of the query.
         for track in q.execute():
-            self.assertEqual(track.GenreId, genre_id)
+            self.assertEqual(genre_id, track.GenreId)
     
     def test_nestedQueryInWhereClause(self):
         tbl_album = self.tables['Album']
         tbl_genre = self.tables['Genre']
         tbl_track = self.tables['Track']
-        
+    
         genre_id = self.db.query(tbl_genre)\
-            .where(tbl_genre['Name'] == Value('Alternative & Punk'))\
+            .where(tbl_genre.getColumn('Name') == Value('Alternative & Punk'))\
             .execute()[0].GenreId
-        
-        q = self.db.query(tbl_album['Title'])\
+    
+        q = self.db.query(tbl_album.getColumn('Title'))\
                 .where(
                     In_(
-                        tbl_album['AlbumId'],
-                        self.db.query(tbl_track['AlbumId'])\
-                            .where(tbl_track['GenreId'] == Value(genre_id))
+                        tbl_album.getColumn('AlbumId'),
+                        self.db.query(tbl_track.getColumn('AlbumId'))\
+                            .where(tbl_track.getColumn('GenreId') == Value(genre_id))
                     )
                 )
-        
+    
         # No assertion here because subqueries because subqueries in the select
         # clause have not been implemented.
         # However, the query running without error is important to test.
         q.execute()
-    

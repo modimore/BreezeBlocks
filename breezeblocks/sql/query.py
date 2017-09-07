@@ -241,7 +241,7 @@ class Query(TableExpression):
         print(self._stmt)
         print(self._stmt_params)
     
-    def __getitem__(self, key):
+    def getColumn(self, key):
         if self._column_exprs is None:
             self._construct_columns
         
@@ -293,7 +293,7 @@ class AliasedQuery(TableExpression):
         else:
             return False
     
-    def __getitem__(self, key):
+    def getColumn(self, key):
         if isinstance(key, str):
             return self._column_exprs[key]
         else:

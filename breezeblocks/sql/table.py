@@ -41,7 +41,7 @@ class Table(TableExpression):
         else:
             return False
     
-    def __getitem__(self, key):
+    def getColumn(self, key):
         if isinstance(key, str):
             return self._column_exprs[key]
         else:
@@ -81,7 +81,7 @@ class AliasedTable(TableExpression):
         else:
             return False
     
-    def __getitem__(self, key):
+    def getColumn(self, key):
         if isinstance(key, str):
             return self._column_exprs[key]
         else:
