@@ -1,6 +1,7 @@
 import unittest
 import sqlite3
 from breezeblocks import Database, Table
+from breezeblocks.sql.join import InnerJoin, LeftJoin
 from breezeblocks.sql.operators import Equal_, In_
 from breezeblocks.sql.values import QmarkStyleValue as Value
 
@@ -113,3 +114,43 @@ class SQLiteChinookTests(unittest.TestCase):
             self.assertTrue(hasattr(row, 'ArtistId'))
             self.assertTrue(hasattr(row, 'Title'))
             self.assertEqual(artist_id, row.ArtistId)
+    
+    def test_innerJoin(self):
+        tbl_genre = self.tables['Genre']
+        tbl_track = self.tables['Track']
+    
+        tbl_joinGenreTrack = InnerJoin(tbl_track, tbl_genre, using=['GenreId'])
+    
+        q = self.db.query(
+            tbl_joinGenreTrack.left.getColumn('Name').as_('TrackName'),
+            tbl_joinGenreTrack.right.getColumn('Name').as_('GenreName'))\
+            .from_(tbl_joinGenreTrack)\
+            .where(Equal_(tbl_joinGenreTrack.right.getColumn('Name'), Value('Classical')))
+    
+        for row in q.execute():
+            self.assertEqual(2, len(row))
+            self.assertTrue(hasattr(row, 'TrackName'))
+            self.assertTrue(hasattr(row, 'GenreName'))
+    
+    def test_leftOuterJoin(self):
+        tbl_album = self.tables['Album']
+        tbl_track = self.tables['Track']
+        
+        tbl_leftJoinTrackAlbum = LeftJoin(tbl_track, tbl_album, using=['AlbumId'])
+        
+        q = self.db.query(
+            tbl_leftJoinTrackAlbum.left.getColumn('Name'),
+            tbl_leftJoinTrackAlbum.right.getColumn('Title').as_('AlbumTitle')
+        )
+        
+        for row in q.execute():
+            self.assertTrue(hasattr(row, 'Name'))
+            self.assertTrue(hasattr(row, 'AlbumTitle'))
+    
+    # Right Join not supported by SQLite currently.
+    # def test_rightOuterJoin(self):
+        # pass
+    
+    # Full Outer Join not supported by SQLite currently
+    # def test_fullOuterJoin(self):
+        # pass
