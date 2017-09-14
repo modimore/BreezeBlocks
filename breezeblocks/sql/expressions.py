@@ -98,15 +98,18 @@ class _AliasedExpr(Selectable):
     """
     
     def __init__(self, expr, alias):
-        self._expr = expr
-        self._alias = alias
+        if isinstance(expr, _AliasedExpr):
+            self.__init__(expr._expr, alias)
+        else:
+            self._expr = expr
+            self._alias = alias
     
     def _get_name(self):
         return self._alias
     
     def _get_select_field(self):
         return '{} AS {!s}'.format(
-            self._expr._get_ref_field(), self._alias)
+            self._expr._get_select_field(), self._alias)
     
     def _get_params(self):
         return self._expr._get_params()

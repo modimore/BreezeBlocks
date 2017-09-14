@@ -1,5 +1,6 @@
 """SQL Aggregate functions."""
-from .expressions import _ValueExpr
+from .query_components import Selectable
+from .expressions import _ValueExpr, _AliasedExpr
 
 class _Aggregator(_ValueExpr):
     """A SQL aggregator function.
@@ -12,7 +13,7 @@ class _Aggregator(_ValueExpr):
         self._expr = expr
     
     def _get_name(self):
-        """Aggregates do not by default have names."""
+        # Aggregates do not by default have names.
         return None
     
     def _get_select_field(self):
@@ -68,3 +69,21 @@ class Avg_(_Aggregator):
     
     def _get_ref_field(self):
         return 'AVG({})'.format(self._expr._get_ref_field())
+
+class RecordCount(Selectable):
+    """Count of the records in the tables of the query."""
+    
+    def _get_name(self):
+        return None
+    
+    def _get_select_field(self):
+        return 'COUNT(*)'
+    
+    def _get_params(self):
+        return tuple()
+    
+    def _get_tables(self):
+        return tuple()
+    
+    def as_(self, alias):
+        return _AliasedExpr(self, alias)
