@@ -1,7 +1,8 @@
 import unittest
 import sqlite3
 from breezeblocks import Database, Table
-from breezeblocks.sql.join import InnerJoin, LeftJoin
+from breezeblocks.sql.aggregates import RecordCount
+from breezeblocks.sql.join import InnerJoin, LeftJoin, CrossJoin
 from breezeblocks.sql.operators import Equal_, In_
 from breezeblocks.sql.values import QmarkStyleValue as Value
 
@@ -20,7 +21,8 @@ class SQLiteChinookTests(unittest.TestCase):
             'Genre': Table('Genre', ['GenreId', 'Name']),
             'Album': Table('Album', ['AlbumId', 'Title', 'ArtistId']),
             'Track': Table('Track',
-                ['TrackId', 'Name', 'AlbumId', 'MediaTypeId', 'GenreId', 'Composer', 'Milliseconds', 'Bytes', 'UnitPrice'])
+                ['TrackId', 'Name', 'AlbumId', 'MediaTypeId', 'GenreId', 'Composer', 'Milliseconds', 'Bytes', 'UnitPrice']),
+            'Playlist': Table('Playlist', ['PlaylistId', 'Name'])
         }
     
     def test_tableQuery(self):
@@ -154,3 +156,28 @@ class SQLiteChinookTests(unittest.TestCase):
     # Full Outer Join not supported by SQLite currently
     # def test_fullOuterJoin(self):
         # pass
+    
+    def test_crossJoin(self):
+        tbl_playlist = self.tables['Playlist']
+        tbl_track = self.tables['Track']
+        
+        playlistRecordCount = self.db.query()\
+            .from_(tbl_playlist)\
+            .select(RecordCount())\
+            .execute()[0][0]
+        
+        trackRecordCount = self.db.query()\
+            .from_(tbl_track)\
+            .select(RecordCount())\
+            .execute()[0][0]
+        
+        q = self.db.query()\
+            .from_(CrossJoin(tbl_playlist, tbl_track))\
+            .select(RecordCount().as_('RecordCount'))
+        
+        joinSizeRow = q.execute()[0]
+        
+        self.assertEqual(playlistRecordCount * trackRecordCount, joinSizeRow.RecordCount,
+            'The cross join should contain as many records as '\
+            'the number of playlists times the number of tracks.'
+        )
