@@ -24,15 +24,19 @@ class PooledConnection(object):
     
     def close(self):
         """Puts the connection back in the pool."""
-        for cur_ref in self._cursor_refs:
-            cur = cur_ref()
-            if cur is not None:
-                try:
-                    cur.close()
-                except self._pool._dbapi.Error:
-                    pass
-        
-        self._pool._putconn(self._conn)
+        if self._conn is not None:
+            conn = self._conn
+            self._conn = None
+            
+            for cur_ref in self._cursor_refs:
+                cur = cur_ref()
+                if cur is not None:
+                    try:
+                        cur.close()
+                    except self._pool._dbapi.Error:
+                        pass
+            
+            self._pool._putconn(conn)
     
     def commit(self):
         """Commits changes to the underlying connection."""
