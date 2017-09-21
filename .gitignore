@@ -28,6 +28,9 @@ wheels/
 # Sphinx documentation
 docs/_build/
 
+# Virtualenv Directory
+venv/
+
 # General virtualenv
 pip-selfcheck.json
 pyvenv.cfg
@@ -41,4 +44,3 @@ Scripts/
 bin/
 include/
 lib/
-
