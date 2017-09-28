@@ -128,7 +128,7 @@ class Query(TableExpression):
         :return: `self` for method chaining.
         """
         for cond in conditions:
-            if isinstance(arg, Referenceable):
+            if isinstance(cond, Referenceable):
                 self._having_conditions.append(cond)
             else:
                 raise QueryError('Invalid having argument - {!r}'.format(cond))
@@ -198,6 +198,12 @@ class Query(TableExpression):
         
         # Construct the 'HAVING' portion, if used.
         if len(self._having_conditions) > 0:
+            if len(self._group_exprs) < 1:
+                raise QueryError(
+                    'HAVING clause must be accompanied by'
+                    'at least one grouping field.'
+                )
+            
             query_buffer.write('\nHAVING ')
             query_buffer.write(
                 '\n   AND '.join(

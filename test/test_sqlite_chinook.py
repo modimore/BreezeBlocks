@@ -1,7 +1,8 @@
 import unittest
 import sqlite3
 from breezeblocks import Database, Table
-from breezeblocks.sql.aggregates import RecordCount
+from breezeblocks.exceptions import QueryError
+from breezeblocks.sql.aggregates import Count_, RecordCount
 from breezeblocks.sql.join import InnerJoin, LeftJoin, CrossJoin
 from breezeblocks.sql.operators import Equal_, In_
 from breezeblocks.sql.values import QmarkStyleValue as Value
@@ -116,6 +117,40 @@ class SQLiteChinookTests(unittest.TestCase):
             self.assertTrue(hasattr(row, 'ArtistId'))
             self.assertTrue(hasattr(row, 'Title'))
             self.assertEqual(artist_id, row.ArtistId)
+    
+    def test_groupBy(self):
+        tbl_track = self.tables['Track']
+        
+        q = self.db.query(tbl_track.getColumn('GenreId'), Count_(tbl_track.getColumn('TrackId')).as_('TrackCount'))\
+            .group_by(tbl_track.getColumn('GenreId'))
+        
+        for row in q.execute():
+            self.assertTrue(hasattr(row, 'GenreId'))
+            self.assertTrue(hasattr(row, 'TrackCount'))
+    
+    def test_having(self):
+        tbl_track = self.tables['Track']
+        
+        q = self.db.query(tbl_track.getColumn('GenreId'), Count_(tbl_track.getColumn('TrackId')).as_('TrackCount'))\
+            .group_by(tbl_track.getColumn('GenreId'))\
+            .having(Count_(tbl_track.getColumn('TrackId')) > Value(25))
+        
+        for row in q.execute():
+            self.assertTrue(hasattr(row, 'GenreId'))
+            self.assertTrue(hasattr(row, 'TrackCount'))
+            self.assertLess(25, row.TrackCount,
+                'The track count should be greater than specified in the'\
+                'having clause.'
+            )
+    
+    def test_havingMustHaveGroupBy(self):
+        tbl_track = self.tables['Track']
+        
+        q = self.db.query(tbl_track.getColumn('GenreId'), Count_(tbl_track.getColumn('TrackId')).as_('TrackCount'))\
+            .having(Count_(tbl_track.getColumn('TrackId')) > Value(25))
+        
+        with self.assertRaises(QueryError):
+            q.execute()
     
     def test_innerJoin(self):
         tbl_genre = self.tables['Genre']
