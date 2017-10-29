@@ -30,7 +30,7 @@ class Query(TableExpression):
         self._where_conditions = []
         self._group_exprs = []
         self._having_conditions = []
-        self._ordering_exprs = []
+        self._orderings = []
         
         self._stmt = None
         self._stmt_params = None
@@ -135,9 +135,30 @@ class Query(TableExpression):
         
         return self
     
-    # TODO
-    def order_by(self, *args):
-        raise NotImplementedError()
+    def order_by(self, *exprs, ascending=True, nulls=None):
+        """Adds statements to the ORDER BY clause of a query.
+        
+        Used for specifying an ordering for the result set.
+        All expression in a single invocation of this method share their
+        sort order and placement of nulls. Invoke this method multiple times
+        in order to specify different values for these.
+        
+        :param exprs: The columns to order the result set by.
+          Each argument should be a column expression by which rows in the
+          result set can be ordered.
+        :param ascending: Flag determining whether to sort in ascending or
+          descending order. Defaults to True (ascending).
+        :param nulls: Sets where in the sort order nulls belong. Valid values
+          are 'FIRST', 'LAST', and None.
+        
+        :return `self` for method chaining.
+        """
+        for expr in exprs:
+            if isinstance(expr, Referenceable):
+                self._orderings.append(_QueryOrdering(expr, ascending, nulls))
+            else:
+                raise QueryError('Invalid order by argument - {!r}'.format(expr))
+        return self
     
     def _finalize(self):
         self._construct_fields()
@@ -210,6 +231,13 @@ class Query(TableExpression):
                     cond._get_ref_field() for cond in self._having_conditions))
             for cond in self._having_conditions:
                 self._stmt_params.extend(cond._get_params())
+        
+        if len(self._orderings) > 0:
+            query_buffer.write('\nORDER BY ')
+            query_buffer.write(', '.join(
+                order._get_order_spec() for order in self._orderings))
+            for order in self._orderings:
+                self._stmt_params.extend(order._get_params())
         
         # Assign the resulting statement to the statement member.
         self._stmt = query_buffer.getvalue()
@@ -313,3 +341,28 @@ class AliasedQuery(AliasedTableExpression):
             return self._alias == other._alias and self._table_expr == other._table_expr
         else:
             return False
+
+class _QueryOrdering:
+    def __init__(self, expr, ascending=True, nulls=None):
+        self._expr = expr
+        self._ascending = ascending
+        
+        if nulls is not None and nulls.lower() not in ('first', 'last'):
+            raise QueryError('NULLS in an order by clause can only be "FIRST" or "LAST"')
+        self._nulls = nulls
+    
+    def _get_order_spec(self):
+        if self._nulls is not None:
+            return '{0} {1} NULLS {2}'.format(
+                self._expr._get_ref_field(),
+                'ASC' if self._ascending else 'DESC',
+                self._nulls
+            )
+        else:
+            return '{0} {1}'.format(
+                self._expr._get_ref_field(),
+                'ASC' if self._ascending else 'DESC'
+            )
+    
+    def _get_params(self):
+        return self._expr._get_params()

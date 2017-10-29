@@ -152,6 +152,28 @@ class SQLiteChinookTests(unittest.TestCase):
         with self.assertRaises(QueryError):
             q.execute()
     
+    def test_orderByAsc(self):
+        tbl_artist = self.tables['Artist']
+        
+        q = self.db.query(tbl_artist.getColumn('Name'))\
+            .order_by(tbl_artist.getColumn('Name'))
+        
+        rows = q.execute()
+        prev_name = rows[0].Name
+        for row in rows:
+            self.assertLessEqual(prev_name, row.Name)
+    
+    def test_orderByDesc(self):
+        tbl_artist = self.tables['Artist']
+        
+        q = self.db.query(tbl_artist.getColumn('Name'))\
+            .order_by(tbl_artist.getColumn('Name'), ascending=False)
+        
+        rows = q.execute()
+        prev_name = rows[0].Name
+        for row in rows:
+            self.assertGreaterEqual(prev_name, row.Name)
+    
     def test_innerJoin(self):
         tbl_genre = self.tables['Genre']
         tbl_track = self.tables['Track']
