@@ -162,6 +162,7 @@ class SQLiteChinookTests(unittest.TestCase):
         prev_name = rows[0].Name
         for row in rows:
             self.assertLessEqual(prev_name, row.Name)
+            prev_name = row.Name
     
     def test_orderByDesc(self):
         tbl_artist = self.tables['Artist']
@@ -173,6 +174,15 @@ class SQLiteChinookTests(unittest.TestCase):
         prev_name = rows[0].Name
         for row in rows:
             self.assertGreaterEqual(prev_name, row.Name)
+            prev_name = row.Name
+    
+    # NULLS { FIRST | LAST } syntax not supported by SQLite currently.
+    # def test_orderByNullsFirst(self):
+    #     pass
+    
+    # NULLS { FIRST | LAST } syntax not supported by SQLite currently.
+    # def test_orderByNullsLast(self):
+    #     pass
     
     def test_innerJoin(self):
         tbl_genre = self.tables['Genre']
