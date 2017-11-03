@@ -21,3 +21,11 @@ This package is meant to help you use databases, not manage databases. The
 current focus of the project is on querying. Functionality for insertion,
 updating, and deleting are expected to be developed in time. However, defining
 schemas and creating tables are not with the scope of the project.
+
+Version History
+===============
+
+0.1.0
+-----
+Query functionality covers enough possibilities of the SQL language to meet
+most anticipated developer needs.

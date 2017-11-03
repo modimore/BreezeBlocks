@@ -184,6 +184,58 @@ class SQLiteChinookTests(unittest.TestCase):
     # def test_orderByNullsLast(self):
     #     pass
     
+    def test_limit(self):
+        limit_amount = 5
+        
+        tbl_track = self.tables['Track']
+        
+        q = self.db.query(tbl_track.getColumn('Name'))\
+            .limit(limit_amount)
+        
+        rows = q.execute()
+        self.assertLessEqual(len(rows), limit_amount,
+            'Number of rows should not be more than the limit amount.')
+    
+    def test_limitAndOffset(self):
+        limit_amount = 100
+        tbl_track = self.tables['Track']
+        
+        q0 = self.db.query(tbl_track.getColumn('TrackId'))\
+            .order_by(tbl_track.getColumn('TrackId'))\
+            .limit(limit_amount)
+        q1 = self.db.query(tbl_track.getColumn('TrackId'))\
+            .order_by(tbl_track.getColumn('TrackId'))\
+            .limit(limit_amount, limit_amount)
+        
+        id_set = set(r.TrackId for r in q0.execute())
+        
+        for row in q1.execute():
+            self.assertTrue(row.TrackId not in id_set,
+                'Using offset should result in different data being'
+                'returned than that of a non-offset query.'
+            )
+    
+    def test_distinct(self):
+        # Uses album 73 (Eric Clapton Unplugged) because it has multiple genres
+        # of track on the album. It just seems a bit less trivial than most
+        # albums as a test case.
+        album_id = 73
+        tbl_track = self.tables['Track']
+        
+        q0 = self.db.query(tbl_track.getColumn('GenreId'))\
+            .where(tbl_track.getColumn('AlbumId') == Value(album_id))
+        
+        q1 = self.db.query(tbl_track.getColumn('GenreId'))\
+            .where(tbl_track.getColumn('AlbumId') == Value(album_id))\
+            .distinct()
+        
+        genres0 = set(row.GenreId for row in q0.execute())
+        genres1 = [row.GenreId for row in q1.execute()]
+        self.assertEqual(len(genres0), len(genres1),
+            'Set of all genres in the album should be the same size as'
+            'the list of genres retrieved with SELECT DISTINCT.'
+        )
+    
     def test_innerJoin(self):
         tbl_genre = self.tables['Genre']
         tbl_track = self.tables['Track']

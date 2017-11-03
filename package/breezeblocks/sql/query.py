@@ -31,6 +31,9 @@ class Query(TableExpression):
         self._group_exprs = []
         self._having_conditions = []
         self._orderings = []
+        self._limit = None
+        self._offset = None
+        self._distinct = False
         
         self._stmt = None
         self._stmt_params = None
@@ -160,6 +163,32 @@ class Query(TableExpression):
                 raise QueryError('Invalid order by argument - {!r}'.format(expr))
         return self
     
+    def limit(self, limit, offset=None):
+        """Sets LIMIT and OFFSET for a query.
+        
+        Used to specify the maximum number of results you want and where those
+        results come from in the table.
+        
+        :param limit: The maximum number of rows for the query to get.
+        :param offset: The starting index of the results in the larger possible
+            un-limited result set.
+        
+        :return: `self` for method chaining.
+        """
+        if self._limit is not None:
+            raise QueryError('Limit may only be set once.')
+        self._limit, self._offset = limit, offset
+        
+        return self
+    
+    def distinct(self):
+        """Sets the query to use DISTINCT in the SELECT clause.
+        
+        :return: `self` for method chaining.
+        """
+        self._distinct = True
+        return self
+    
     def _finalize(self):
         self._construct_fields()
         self._construct_columns()
@@ -186,7 +215,10 @@ class Query(TableExpression):
         self._stmt_params = []
         
         # Construct the 'SELECT' portion.
-        query_buffer.write('SELECT\n\t')
+        if self._distinct:
+            query_buffer.write('SELECT DISTINCT\n\t')
+        else:
+            query_buffer.write('SELECT\n\t')
         query_buffer.write(
             ',\n\t'.join(
                 e._get_select_field() for e in self._output_exprs))
@@ -238,6 +270,12 @@ class Query(TableExpression):
                 order._get_order_spec() for order in self._orderings))
             for order in self._orderings:
                 self._stmt_params.extend(order._get_params())
+        
+        if self._limit is not None:
+            if self._offset is not None:
+                query_buffer.write('\nLIMIT {0} OFFSET {1}'.format(self._limit, self._offset))
+            else:
+                query_buffer.write('\nLIMIT {0}'.format(self._limit))
         
         # Assign the resulting statement to the statement member.
         self._stmt = query_buffer.getvalue()
