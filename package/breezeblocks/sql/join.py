@@ -1,5 +1,6 @@
 from .query_components import TableExpression
 from .expressions import _ValueExpr
+from .column_collection import ColumnCollection
 from ..exceptions import QueryError
 
 class _JoinColumn(_ValueExpr):
@@ -21,28 +22,18 @@ class _JoinColumn(_ValueExpr):
     def _get_tables(self):
         return set((self._join_expr,))
 
-class _JoinedTable(object):
+class _JoinedTable(ColumnCollection):
     """A table that is one side of a join expression."""
     
     def __init__(self, join_expr, table):
         self._join_expr = join_expr
         self._table = table
         
-        self._column_exprs = {}
-        for name, column_expr in self._table._column_exprs.items():
-            self._column_exprs[name] = _JoinColumn(join_expr, column_expr)
+        join_columns = [_JoinColumn(join_expr, column) for column in table._get_selectables()]
+        super().__init__(join_columns)
     
-    def getColumn(self, key):
-        if isinstance(key, str):
-            return self._column_exprs[key]
-        else:
-            raise TypeError('Tables require strings for lookup keys.')
-    
-    def _get_selectables(self):
-        return tuple(self._column_exprs[k] for k in self._table._column_names)
-    
-    def _get_params(self):
-        return self._table._get_params()
+    def _get_tables(self):
+        return {self._join_expr}
     
     def _get_from_field(self):
         return self._table._get_from_field()
@@ -67,10 +58,10 @@ class _Join(TableExpression):
         if not isinstance(key, str):
             raise TypeError('Tables require strings for lookup keys.')
         
-        if key in self._left._column_exprs:
-            return self._left._column_exprs[key]
-        elif key in self._right._column_exprs:
-            return self._right._column_exprs[key]
+        if key in self._left._columns:
+            return self._left.getColumn(key)
+        elif key in self._right._columns:
+            return self._right.getColumn(key)
         else:
             raise KeyError()
     
@@ -80,8 +71,8 @@ class _Join(TableExpression):
     def __eq__(self, other):
         if (isinstance(other, self.__class__)):
             return (
-                self._left.table == other._left.table and
-                self._right.table == other._right.table
+                self._left._table == other._left._table and
+                self._right._table == other._right._table
             )
         else:
             return False
@@ -94,8 +85,8 @@ class _Join(TableExpression):
     
     def _get_params(self):
         params = []
-        params.extend(self._left._get_params())
-        params.extend(self._right._get_params())
+        params.extend(self._left._table._get_params())
+        params.extend(self._right._table._get_params())
         return params
     
     def _get_join_expression(self):

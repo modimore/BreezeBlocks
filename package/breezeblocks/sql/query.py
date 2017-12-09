@@ -2,6 +2,7 @@ from .query_components import TableExpression
 from .query_components import Referenceable
 from .query_components import Selectable
 from .table import AliasedTableExpression
+from .column_collection import ColumnCollection
 
 from ..exceptions import QueryError
 
@@ -58,6 +59,10 @@ class Query(TableExpression):
             if isinstance(expr, Selectable):
                 self._output_exprs.append(expr)
                 self._relations.update(expr._get_tables())
+            elif isinstance(expr, ColumnCollection):
+                self._relations.update(expr._get_tables())
+                self._output_exprs.extend(
+                    expr._get_selectables())
             elif isinstance(expr, TableExpression):
                 self._relations.add(expr)
                 self._output_exprs.extend(

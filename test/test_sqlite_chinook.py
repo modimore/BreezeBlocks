@@ -237,21 +237,21 @@ class SQLiteChinookTests(unittest.TestCase):
         )
     
     def test_innerJoin(self):
-        tbl_genre = self.tables['Genre']
+        tbl_album = self.tables['Album']
         tbl_track = self.tables['Track']
     
-        tbl_joinGenreTrack = InnerJoin(tbl_track, tbl_genre, using=['GenreId'])
+        tbl_joinAlbumTrack = InnerJoin(tbl_album, tbl_track, using=['AlbumId'])
     
         q = self.db.query(
-            tbl_joinGenreTrack.left.getColumn('Name').as_('TrackName'),
-            tbl_joinGenreTrack.right.getColumn('Name').as_('GenreName'))\
-            .from_(tbl_joinGenreTrack)\
-            .where(Equal_(tbl_joinGenreTrack.right.getColumn('Name'), Value('Classical')))
+            tbl_joinAlbumTrack.left,
+            tbl_joinAlbumTrack.right.getColumn('Name'))
     
         for row in q.execute():
-            self.assertEqual(2, len(row))
-            self.assertTrue(hasattr(row, 'TrackName'))
-            self.assertTrue(hasattr(row, 'GenreName'))
+            self.assertEqual(4, len(row))
+            self.assertTrue(hasattr(row, 'AlbumId'))
+            self.assertTrue(hasattr(row, 'Title'))
+            self.assertTrue(hasattr(row, 'ArtistId'))
+            self.assertTrue(hasattr(row, 'Name'))
     
     def test_leftOuterJoin(self):
         tbl_album = self.tables['Album']
