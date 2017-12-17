@@ -27,8 +27,14 @@ class ColumnCollection(object):
             tables.update(column._get_tables())
         return tables
     
-    def getColumn(self, key):
+    def _get_column(self, key):
         if isinstance(key, str):
             return self._columns[key]
         else:
             raise TypeError('Column Collections require strings for column names.')
+    
+    def __getitem__(self, key):
+        return self._get_column(key)
+    
+    def getColumn(self, key):
+        return self._get_column(key)
