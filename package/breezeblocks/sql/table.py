@@ -1,5 +1,6 @@
 from .query_components import TableExpression
 from .column import ColumnExpr
+from .column_collection import ColumnCollection
 
 class Table(TableExpression):
     """Represents a database table."""
@@ -12,10 +13,7 @@ class Table(TableExpression):
         else:
             self.name = table_name
         
-        # Register all the columns of this table.
-        self._column_names = tuple(column_names)
-        self._column_exprs = {
-            name: ColumnExpr(name, self) for name in self._column_names}
+        self._columns = _TableColumnCollection(self, column_names)
     
     def __hash__(self):
         """Calculates a hash value for this table.
@@ -41,23 +39,34 @@ class Table(TableExpression):
         else:
             return False
     
+    @property
+    def columns(self):
+        return self._columns
+    
     def getColumn(self, key):
-        if isinstance(key, str):
-            return self._column_exprs[key]
-        else:
-            raise TypeError('Tables require strings for lookup keys.')
+        return self._columns[key]
     
     def _get_from_field(self):
         return self.name
     
     def _get_selectables(self):
-        return tuple(self._column_exprs[k] for k in self._column_names)
+        return self._columns._get_selectables()
     
     def _get_params(self):
         return tuple()
     
     def as_(self, alias):
         return AliasedTableExpression(self, alias)
+
+class _TableColumnCollection(ColumnCollection):
+    def __init__(self, table, column_names):
+        columns = [ColumnExpr(name, table) for name in column_names]
+        super().__init__(columns)
+        
+        self._table = table
+    
+    def _get_tables(self):
+        return {self._table}
 
 class AliasedTableExpression(TableExpression):
     """A table expression that has been given an alias for use in queries."""
@@ -68,9 +77,8 @@ class AliasedTableExpression(TableExpression):
         self.name = alias
         
         # Add the underlying table's columns.
-        self._column_names = self._table_expr._column_names
-        self._column_exprs = {
-            name: ColumnExpr(name, self) for name in self._column_names}
+        column_names = [col._get_name() for col in table_expr._get_selectables()]
+        self._columns = _TableColumnCollection(self, column_names)
     
     def __hash__(self):
         return hash((self.name, self._table_expr))
@@ -81,11 +89,12 @@ class AliasedTableExpression(TableExpression):
         else:
             return False
     
+    @property
+    def columns(self):
+        return self._columns
+    
     def getColumn(self, key):
-        if isinstance(key, str):
-            return self._column_exprs[key]
-        else:
-            raise TypeError('Tables require strings for lookup keys.')
+        return self._columns[key]
     
     def _get_from_field(self):
         """Returns the appropriate from field for queries.
@@ -97,7 +106,7 @@ class AliasedTableExpression(TableExpression):
             self._table_expr._get_from_field(), self.name)
     
     def _get_selectables(self):
-        return tuple(self._column_exprs[k] for k in self._column_names)
+        return self._columns._get_selectables()
     
     def _get_params(self):
         return self._table_expr._get_params()
