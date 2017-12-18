@@ -15,7 +15,7 @@ class ColumnCollection(object):
     """
     
     def __init__(self, columns):
-        self._column_names = (column._get_name() for column in columns)
+        self._column_names = tuple(column._get_name() for column in columns)
         self._columns = {column._get_name(): column for column in columns}
     
     def _get_selectables(self):
@@ -38,3 +38,6 @@ class ColumnCollection(object):
     
     def getColumn(self, key):
         return self._get_column(key)
+    
+    def getNames(self):
+        return self._column_names
