@@ -25,6 +25,11 @@ schemas and creating tables are not with the scope of the project.
 Version History
 ===============
 
+0.1.1
+-----
+Introduces the Column Collection concept to the code, and starts using its
+implementation in tables, joins, and queries.
+
 0.1.0
 -----
 Query functionality covers enough possibilities of the SQL language to meet

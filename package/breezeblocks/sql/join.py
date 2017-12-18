@@ -59,9 +59,9 @@ class _Join(TableExpression):
             raise TypeError('Tables require strings for lookup keys.')
         
         if key in self._left._columns:
-            return self._left.getColumn(key)
+            return self._left[key]
         elif key in self._right._columns:
-            return self._right.getColumn(key)
+            return self._right[key]
         else:
             raise KeyError()
     
