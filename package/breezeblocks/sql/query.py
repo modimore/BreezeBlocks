@@ -1,6 +1,8 @@
 from .query_components import TableExpression
 from .query_components import Referenceable
 from .query_components import Selectable
+from .expressions import _ValueExpr
+from .column import AliasedColumnExpr
 from .table import AliasedTableExpression
 from .column_collection import ColumnCollection
 
@@ -39,8 +41,7 @@ class Query(TableExpression):
         self._stmt = None
         self._stmt_params = None
         
-        self._column_names = None
-        self._column_exprs = None
+        self._columns = None
         self._return_type = None
         
         self.select(*select_args)
@@ -194,8 +195,14 @@ class Query(TableExpression):
         self._distinct = True
         return self
     
+    @property
+    def columns(self):
+        if not self._is_finalized():
+            self._finalize()
+        
+        return self._columns
+    
     def _finalize(self):
-        self._construct_fields()
         self._construct_columns()
         self._construct_return_type()
         self._construct_sql()
@@ -204,8 +211,7 @@ class Query(TableExpression):
         return (
             self._stmt is not None and
             self._stmt_params is not None and
-            self._column_names is not None and
-            self._column_exprs is not None and
+            self._columns is not None and
             self._return_type is not None
         )
     
@@ -285,9 +291,6 @@ class Query(TableExpression):
         # Assign the resulting statement to the statement member.
         self._stmt = query_buffer.getvalue()
     
-    def _construct_fields(self):
-        self._column_names = tuple(f._get_name() for f in self._output_exprs)
-    
     def _construct_return_type(self):
         """Constructs the return type for a query based on its select fields."""
         if self._return_type is not None:
@@ -295,18 +298,14 @@ class Query(TableExpression):
         
         from collections import namedtuple
         
-        if self._column_names is None:
-            self._construct_fields()
+        if self._columns is None:
+            self._construct_columns()
         
         self._return_type = namedtuple('QueryResult_'+str(id(self)),
-            self._column_names, rename=True)
+            self._columns.getNames(), rename=True)
     
     def _construct_columns(self):
-        if self._column_names is None:
-            self._construct_fields()
-        
-        self._column_exprs = {
-            f._get_name(): f for f in self._output_exprs}
+        self._columns = _QueryColumnCollection(self)
     
     def _process_result(self, r):
         """Constructs an object of the correct return type from a result row."""
@@ -339,7 +338,7 @@ class Query(TableExpression):
             self._finalize()
         
         if isinstance(key, str):
-            return self._column_exprs[key]
+            return self._columns[key]
         else:
             raise TypeError('Tables require strings for lookup keys.')
     
@@ -356,7 +355,7 @@ class Query(TableExpression):
         if not self._is_finalized():
             self._finalize()
         
-        return tuple(self._column_exprs[k] for k in self._column_names)
+        return tuple(self._columns[name] for name in self._columns.getNames())
     
     def _get_params(self):
         if not self._is_finalized():
@@ -384,6 +383,41 @@ class AliasedQuery(AliasedTableExpression):
             return self._alias == other._alias and self._table_expr == other._table_expr
         else:
             return False
+
+class _QueryColumn(_ValueExpr):
+    """Represents a column from a non-aliased query.
+    
+    Columns from non-aliased queries behave subtly differently than most
+    columns, and those small differences are handled by this class.
+    """
+    
+    def __init__(self, column, query):
+        self._query = query
+        self._column = column
+    
+    def _get_name(self):
+        return self._column._get_name()
+    
+    def _get_ref_field(self):
+        return self._get_name()
+    
+    def _get_select_field(self):
+        return self._get_name()
+    
+    def _get_tables(self):
+        return {self._query}
+    
+    def as_(self, alias):
+        return AliasedColumnExpr(self, alias)
+
+class _QueryColumnCollection(ColumnCollection):
+    def __init__(self, query):
+        self._query = query
+        columns = [_QueryColumn(expr, query) for expr in query._output_exprs]
+        super().__init__(columns)
+    
+    def _get_tables(self):
+        return {self._query}
 
 class _QueryOrdering:
     def __init__(self, expr, ascending=True, nulls=None):
