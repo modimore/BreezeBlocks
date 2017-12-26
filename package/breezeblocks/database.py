@@ -1,6 +1,6 @@
 from .exceptions import MissingModuleError
 from .pool import ConnectionPool as Pool
-from .sql import Query
+from .query_builder import QueryBuilder
 
 class Database(object):
     """Proxies the database at the URI provided."""
@@ -19,12 +19,12 @@ class Database(object):
             dsn, *args, **kwargs)
     
     def query(self, *queryables):
-        """Starts defining a query in the database.
+        """Starts building a query in this database.
         
         Any arguments should be selectable expressions, such as columns or
         values that should end up in the result rows of the query.
         """
-        return Query(self, *queryables)
+        return QueryBuilder(self).select(*queryables)
     
     def connect(self):
         """Returns a new connection to the database."""

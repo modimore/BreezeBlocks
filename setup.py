@@ -5,7 +5,7 @@ with open('README.rst', 'r') as f:
     long_description=f.read()
 
 setup(name='breezeblocks',
-    version='0.1.1',
+    version='0.2.0',
     description='A lightweight SQL Querying package.',
     author='Quinn Mortimer',
     author_email='quinn.e.mortimer@gmail.com',
@@ -15,7 +15,7 @@ setup(name='breezeblocks',
     package_dir={ '': 'package' },
     long_description=long_description,
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",

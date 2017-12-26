@@ -24,6 +24,14 @@ schemas and creating tables are not with the scope of the project.
 
 Version History
 ===============
+0.2.0
+-----
+Divide the responsibilities of building and representing a query between two
+classes, Query and the new QueryBuilder.
+
+If upgrading from a previous version, please review the Query and QueryBuilder
+classes. When building a query, query_builder.get() must now be invoked to
+get a usable query object.
 
 0.1.1
 -----
