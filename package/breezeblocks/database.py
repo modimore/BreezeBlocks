@@ -1,9 +1,6 @@
-from .pool import ConnectionPool as Pool
-
-from .sql import Table
-from .sql import Query
-
 from .exceptions import MissingModuleError
+from .pool import ConnectionPool as Pool
+from .sql import Query
 
 class Database(object):
     """Proxies the database at the URI provided."""
@@ -20,9 +17,6 @@ class Database(object):
         
         self.pool = Pool(self._dbapi, minconn, maxconn,
             dsn, *args, **kwargs)
-        
-        self._schemas = {}
-        self._tables = {}
     
     def query(self, *queryables):
         """Starts defining a query in the database.
