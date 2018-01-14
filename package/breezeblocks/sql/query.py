@@ -87,6 +87,9 @@ class Query(TableExpression):
     
     def _get_params(self):
         return self._params
+    
+    def _get_statement(self):
+        return self._statement
 
 class AliasedQuery(AliasedTableExpression):
     """A finalized query that has been given an alias.

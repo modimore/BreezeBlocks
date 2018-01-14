@@ -35,3 +35,10 @@ class QueryError(BreezeBlocksError):
     
     def __repr__(self):
         return 'BreezeBlocks Query Error: {}'.format(self._message)
+
+class InsertError(BreezeBlocksError):
+    def __init__(self, message):
+        self._message = message
+    
+    def __repr__(self):
+        return 'BreezeBlocks Insert Error: {}'.format(self._message)
