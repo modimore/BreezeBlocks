@@ -42,3 +42,10 @@ class InsertError(BreezeBlocksError):
     
     def __repr__(self):
         return 'BreezeBlocks Insert Error: {}'.format(self._message)
+
+class UpdateError(BreezeBlocksError):
+    def __init__(self, message):
+        self._message = message
+    
+    def __repr__(self):
+        return 'BreezeBlocks Update Error: {}'.format(self._message)
