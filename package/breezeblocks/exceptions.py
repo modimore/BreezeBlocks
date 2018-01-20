@@ -49,3 +49,10 @@ class UpdateError(BreezeBlocksError):
     
     def __repr__(self):
         return 'BreezeBlocks Update Error: {}'.format(self._message)
+
+class DeleteError(BreezeBlocksError):
+    def __init__(self, message):
+        self._message = message
+    
+    def __repr__(self):
+        return 'BreezeBlocks Delete Error: {}'.format(self._message)
