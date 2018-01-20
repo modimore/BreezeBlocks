@@ -1,6 +1,7 @@
 from .exceptions import MissingModuleError
 from .pool import ConnectionPool as Pool
 from .query_builder import QueryBuilder
+from .dml_builders import InsertBuilder, UpdateBuilder, DeleteBuilder
 
 class Database(object):
     """Proxies the database at the URI provided."""
@@ -25,6 +26,31 @@ class Database(object):
         values that should end up in the result rows of the query.
         """
         return QueryBuilder(self).select(*queryables)
+    
+    def insert(self, table, columns):
+        """Starts building an insert in this database.
+        
+        :param table: The table to insert into.
+        :param columns: A list of the columns to set values of.
+        :return: An Insert builder for the table and columns provided.
+        """
+        return InsertBuilder(table, columns, db=self)
+    
+    def update(self, table):
+        """Starts building an update in this database.
+        
+        :param table: The table to update rows of.
+        :return: An Update builder for the table provided.
+        """
+        return UpdateBuilder(table, db=self)
+    
+    def delete(self, table):
+        """Starts building a delete in this database.
+        
+        :param table: The table to delete rows from.
+        :return: A delete builder for the table provided.
+        """
+        return DeleteBuilder(table, db=self)
     
     def connect(self):
         """Returns a new connection to the database."""
