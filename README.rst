@@ -24,6 +24,15 @@ schemas and creating tables are not with the scope of the project.
 
 Version History
 ===============
+0.2.1
+-----
+Adding DML functionality. New builders and new operations for database inserts,
+updates, and deletes have been added. They are accessible from the Database
+class just like the query builder.
+
+The new builders use a similar interface to the query builder, and the new
+operations use a similar interface to the query.
+
 0.2.0
 -----
 Divide the responsibilities of building and representing a query between two
