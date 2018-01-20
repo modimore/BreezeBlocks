@@ -12,6 +12,9 @@ class Insert(object):
     def __init__(self, statement_base, table, columns, db=None):
         """Initializes an insert statement against a specific database.
         
+        :param statement_base: The first part of the insert statement.
+        :param table: The table to insert into.
+        :param columns: The columns that data is being inserted in.
         :param db: The database to perform the insert on.
         """
         if db is None:

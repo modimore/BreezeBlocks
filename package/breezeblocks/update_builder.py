@@ -59,7 +59,7 @@ class UpdateBuilder(object):
             params.extend(update[1]._get_params())
         
         if len(self._conditions) > 0:
-            statement_buffer.write('\nWHERE')
+            statement_buffer.write('\nWHERE ')
             
             statement_buffer.write('\n  AND '.join(
                 cond._get_ref_field() for cond in self._conditions))

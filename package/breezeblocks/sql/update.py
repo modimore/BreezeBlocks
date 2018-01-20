@@ -7,9 +7,7 @@ class Update(object):
         """Initializes an update statement against a specific database.
         
         :param statement: The SQL statement for the update.
-        :param table: The table to update.
-        :param columns: The columns in the table being updated.
-        :param exprs: The expression the columns are being set to.
+        :param params: A list of literal values to pass into the statement.
         :param db: The database to perform the update on.
         """
         if db is None:
@@ -24,7 +22,6 @@ class Update(object):
         with self._db.pool.get() as conn:
             cur = conn.cursor()
             cur.execute(self._statement, self._params)
-            results = cur.fetchall()
             cur.close()
             conn.commit()
     
