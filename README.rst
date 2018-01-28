@@ -17,10 +17,9 @@ Query results are plain-old-data types similar to a C struct. They provide
 access to fields of the row by name, but are still compact and don't have as
 much usage overhead as most Python objects.
 
-This package is meant to help you use databases, not manage databases. The
-current focus of the project is on querying. Functionality for insertion,
-updating, and deleting are expected to be developed in time. However, defining
-schemas and creating tables are not with the scope of the project.
+This package is meant to help you use databases, not manage databases.
+Querying, inserting, updating, and deleting (row-level operations) are within
+scope of the project. Creating tables, views, and triggers is not.
 
 Version History
 ===============

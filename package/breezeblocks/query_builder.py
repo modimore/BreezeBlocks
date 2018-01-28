@@ -139,10 +139,19 @@ class QueryBuilder(object):
         return self
     
     def distinct(self):
+        """Set the distinct flag for the query being built to True."""
         self._state.distinct = True
         return self
     
     def get(self):
+        """Get a query object for the current state of the builder.
+        
+        This function is what kicks off the SQL string building and assembling
+        the list of parameters. The results of that will be used to construct
+        the `Query` object.
+        
+        :return: A finished, executable `Query`.
+        """
         statement, params = self._construct_sql()
         return Query(self._state.clone(), statement, params, db=self._db)
     

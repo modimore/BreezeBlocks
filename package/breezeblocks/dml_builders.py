@@ -33,6 +33,10 @@ class InsertBuilder(object):
         return self
     
     def get(self):
+        """Get an insert object for the current state of the builder.
+        
+        :return: A finished, executable `Insert`.
+        """
         return Insert(self._construct_sql(), self._table, self._column_names, db=self._db)
     
     def _construct_sql(self):
@@ -52,6 +56,10 @@ class UpdateBuilder(object):
         self._conditions = []
     
     def get(self):
+        """Get an update object for the current state of the builder.
+        
+        :return: A finished, executable `Update`.
+        """
         statement, params = self._construct_sql()
         return Update(statement, params, self._db)
     
@@ -116,6 +124,10 @@ class DeleteBuilder(object):
         self._conditions = []
     
     def get(self):
+        """Get a delete object for the current state of the builder.
+        
+        :return: A finished, executable `Delete`.
+        """
         statement, params = self._construct_sql()
         return Delete(statement, params, self._db)
     
