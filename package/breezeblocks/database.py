@@ -27,7 +27,7 @@ class Database(object):
         """
         return QueryBuilder(self).select(*queryables)
     
-    def insert(self, table, columns):
+    def insert(self, table, columns=[]):
         """Starts building an insert in this database.
         
         :param table: The table to insert into.
