@@ -1,6 +1,10 @@
 BreezeBlocks
 ============
 
+.. image:: https://readthedocs.org/projects/breezeblocks/badge/?version=latest
+   :target: http://breezeblocks.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
 BreezeBlocks is a query abstraction layer that takes advantage of some of the
 features of the Python language more than DBAPI 2.0 modules, but provides
 more lightweight result objects and more flexible querying than many ORMs for
