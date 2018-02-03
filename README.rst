@@ -27,9 +27,15 @@ scope of the project. Creating tables, views, and triggers is not.
 
 Version History
 ===============
+0.2.2
+-----
+Change the method signature for creating a database, and for executing any
+SQL statement. The change to the database initialization arguments is a
+breaking change.
+
 0.2.1
 -----
-Adding DML functionality. New builders and new operations for database inserts,
+Adds DML functionality. New builders and new operations for database inserts,
 updates, and deletes have been added. They are accessible from the Database
 class just like the query builder.
 
