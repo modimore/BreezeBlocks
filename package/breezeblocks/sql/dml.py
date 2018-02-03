@@ -24,7 +24,7 @@ class Insert(object):
         self._table = table
         self._columns = columns
         
-    def execute(self, data):
+    def execute(self, data, conn=None):
         """Insert rows from data into the database.
         
         The "data" provided can either be a query or actual data.
@@ -37,11 +37,24 @@ class Insert(object):
         is limited to lists or tuples.
         
         :param data: The query or rows to insert.
+        :param conn: Optional connection to use to execute this statement.
+          An insert will get and put back a connection if this isn't provided.
         """
+        manage_conn = conn is None
+        if manage_conn:
+            conn = self._db.pool.get()
+        
+        cur = conn.cursor()
+        
         if isinstance(data, Query):
-            self._insert_from_query(data)
+            self._insert_from_query(data, cur)
         else:
-            self._insert_row_data(data)
+            self._insert_row_data(data, cur)
+        
+        cur.close()
+        if manage_conn:
+            conn.commit()
+            conn.close()
     
     def show(self):
         """Show the constructed SQL for this insert statement."""
@@ -54,17 +67,13 @@ class Insert(object):
         
         print(self._statement_base + ' VALUES ({0})'.format(','.join(param_marker for _ in self._columns)))
     
-    def _insert_from_query(self, query):
+    def _insert_from_query(self, query, cur):
         statement = self._statement_base + '\n' + query._get_statement()
         params = query._get_params()
         
-        with self._db.pool.get() as conn:
-            cur = conn.cursor()
-            cur.execute(statement, params)
-            cur.close()
-            conn.commit()
+        cur.execute(statement, params)
     
-    def _insert_row_data(self, data):
+    def _insert_row_data(self, data, cur):
         if self._db._dbapi.paramstyle == 'qmark':
             param_marker = '?'
         elif self._db._dbapi.paramstyle in ['format', 'pyformat']:
@@ -74,11 +83,7 @@ class Insert(object):
         
         statement = self._statement_base + ' VALUES ({0})'.format(','.join(param_marker for _ in self._columns))
         
-        with self._db.pool.get() as conn:
-            cur = conn.cursor()
-            cur.executemany(statement, data)
-            cur.close()
-            conn.commit()
+        cur.executemany(statement, data)
 
 class Update(object):
     """Represents a database update."""
@@ -97,13 +102,23 @@ class Update(object):
         self._statement = statement
         self._params = params
     
-    def execute(self):
-        """Executes the update in the database."""
-        with self._db.pool.get() as conn:
-            cur = conn.cursor()
-            cur.execute(self._statement, self._params)
-            cur.close()
+    def execute(self, conn=None):
+        """Executes the update in the database.
+        
+        :param conn: Optional connection to use to execute this statement.
+          An update will get and put back a connection if this isn't provided.
+        """
+        manage_conn = conn is None
+        if manage_conn:
+            conn = self._db.pool.get()
+        cur = conn.cursor()
+        
+        cur.execute(self._statement, self._params)
+        
+        cur.close()
+        if manage_conn:
             conn.commit()
+            conn.close()
     
     def show(self):
         """Show the constructed SQL statement for this update."""
@@ -126,13 +141,23 @@ class Delete(object):
         self._statement = statement
         self._params = params
     
-    def execute(self):
-        """Executes the delete in the database."""
-        with self._db.pool.get() as conn:
-            cur = conn.cursor()
-            cur.execute(self._statement, self._params)
-            cur.close()
+    def execute(self, conn=None):
+        """Executes the delete in the database.
+        
+        :param conn: Optional connection to use to execute this statement.
+          A delete will get and put back a connection if this isn't provided.
+        """
+        manage_conn = conn is None
+        if manage_conn:
+            conn = self._db.pool.get()
+        cur = conn.cursor()
+        
+        cur.execute(self._statement, self._params)
+        
+        cur.close()
+        if manage_conn:
             conn.commit()
+            conn.close()
     
     def show(self):
         """Show the constructed SQL statement for this delete."""

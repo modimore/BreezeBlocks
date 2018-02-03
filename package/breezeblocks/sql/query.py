@@ -40,11 +40,13 @@ class Query(TableExpression):
     def columns(self):
         return self._columns
     
-    def execute(self, limit=None, offset=None):
+    def execute(self, limit=None, offset=None, conn=None):
         """Fetch rows in this query from the database.
         
         :param limit: LIMIT argument for this execution.
         :param offset: OFFSET argument for this execution.
+        :param conn: Optional connection to use to execute this query.
+          A query will get and put back a connection if this isn't provided.
         
         :return: The rows returned by the query.
         """
@@ -57,11 +59,17 @@ class Query(TableExpression):
         
         results = []
         
-        with self._db.pool.get() as conn:
-            cur = conn.cursor()
-            cur.execute(statement, self._params)
-            results = cur.fetchall()
-            cur.close()
+        manage_conn = conn is None
+        if manage_conn:
+            conn = self._db.pool.get()
+        cur = conn.cursor()
+        
+        cur.execute(statement, self._params)
+        results = cur.fetchall()
+        
+        cur.close()
+        if manage_conn:
+            conn.close()
         
         return [ self._process_result(r) for r in results ]
     
