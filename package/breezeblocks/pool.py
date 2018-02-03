@@ -78,7 +78,13 @@ class ConnectionPool(object):
     
     def __init__(self, dbapi_module, pool_size, conn_limit,
             *connect_args, **connect_kwargs):
-        """Initializes a pool, connections will be generate  as-needed."""
+        """
+        :param dbapi_module: The DBAPI module to connect through.
+        :param pool_size: Number of standby connections in the pool.
+        :param conn_limit: Maximum number of open connections from the pool.
+        :param connect_args: *args for calls to `dbapi.connect`.
+        :param connect_kwargs: **kwargs for calls to `dbapi.connect`.
+        """
         self._pool_size = pool_size
         self._conn_limit = conn_limit
         self._num_conns = 0
@@ -86,15 +92,15 @@ class ConnectionPool(object):
         self._dbapi = dbapi_module
         
         self._connect = self._dbapi.connect
-        self._conn_args = connect_args
-        self._conn_kwargs = connect_kwargs
+        self._connect_args = connect_args
+        self._connect_kwargs = connect_kwargs
         
         self._pool = queue.Queue(self._pool_size)
     
     def _create_connection(self):
         """Creates a connection and puts in in the pool."""
         self._pool.put(
-            self._connect(*self._conn_args, **self._conn_kwargs))
+            self._connect(*self._connect_args, **self._connect_kwargs))
         self._num_conns += 1
     
     def _getconn(self, block=True, timeout=None):

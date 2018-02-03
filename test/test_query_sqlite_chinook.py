@@ -16,7 +16,7 @@ class SQLiteChinookTests(unittest.TestCase):
     def setUp(self):
         """Performs necessary SQLite3 setup."""
         
-        self.db = Database(DB_URL, sqlite3)
+        self.db = Database(dsn=DB_URL, dbapi_module=sqlite3)
         self.tables = {
             'Artist': Table('Artist', ['ArtistId', 'Name']),
             'Genre': Table('Genre', ['GenreId', 'Name']),
