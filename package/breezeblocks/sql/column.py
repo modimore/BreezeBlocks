@@ -14,7 +14,7 @@ class ColumnExpr(_ValueExpr):
         self.name = name
         
         self.table = table
-        self.full_name = '.'.join([table.name, self.name])
+        self.full_name = ".".join([table.name, self.name])
     
     def _get_name(self):
         """Provides the unqualifed column name as the select field name."""
@@ -67,7 +67,7 @@ class AliasedColumnExpr(_ValueExpr):
     def _get_select_field(self):
         """Returns the expression for selecting this column in a
         query."""
-        return '{} AS {}'.format(
+        return "{} AS {}".format(
             self.full_name, self._alias)
     
     def _get_tables(self):

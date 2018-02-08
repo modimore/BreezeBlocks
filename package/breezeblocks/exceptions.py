@@ -25,7 +25,7 @@ class MissingModuleError(BreezeBlocksError):
     """
     
     def __repr__(self):
-        return 'BreezeBlocks Error: No DBAPI module provided or detected.'
+        return "BreezeBlocks Error: No DBAPI module provided or detected."
 
 class QueryError(BreezeBlocksError):
     """An error occuring during creation of a query."""
@@ -34,25 +34,25 @@ class QueryError(BreezeBlocksError):
         self._message = message
     
     def __repr__(self):
-        return 'BreezeBlocks Query Error: {}'.format(self._message)
+        return "BreezeBlocks Query Error: {}".format(self._message)
 
 class InsertError(BreezeBlocksError):
     def __init__(self, message):
         self._message = message
     
     def __repr__(self):
-        return 'BreezeBlocks Insert Error: {}'.format(self._message)
+        return "BreezeBlocks Insert Error: {}".format(self._message)
 
 class UpdateError(BreezeBlocksError):
     def __init__(self, message):
         self._message = message
     
     def __repr__(self):
-        return 'BreezeBlocks Update Error: {}'.format(self._message)
+        return "BreezeBlocks Update Error: {}".format(self._message)
 
 class DeleteError(BreezeBlocksError):
     def __init__(self, message):
         self._message = message
     
     def __repr__(self):
-        return 'BreezeBlocks Delete Error: {}'.format(self._message)
+        return "BreezeBlocks Delete Error: {}".format(self._message)

@@ -17,7 +17,7 @@ class Insert(object):
         :param db: The database to perform the insert on.
         """
         if db is None:
-            raise InsertError('Attempting to insert without a database.')
+            raise InsertError("Attempting to insert without a database.")
         
         self._db = db
         self._statement_base = statement_base
@@ -58,30 +58,30 @@ class Insert(object):
     
     def show(self):
         """Show the constructed SQL for this insert statement."""
-        if self._db._dbapi.paramstyle == 'qmark':
-            param_marker = '?'
-        elif self._db._dbapi.paramstyle in ['format', 'pyformat']:
-            param_marker = '%s'
+        if self._db._dbapi.paramstyle == "qmark":
+            param_marker = "?"
+        elif self._db._dbapi.paramstyle in ["format", "pyformat"]:
+            param_marker = "%s"
         else:
-            param_marker = '?'
+            param_marker = "?"
         
-        print(self._statement_base + ' VALUES ({0})'.format(','.join(param_marker for _ in self._columns)))
+        print(self._statement_base + " VALUES ({0})".format(",".join(param_marker for _ in self._columns)))
     
     def _insert_from_query(self, query, cur):
-        statement = self._statement_base + '\n' + query._get_statement()
+        statement = self._statement_base + "\n" + query._get_statement()
         params = query._get_params()
         
         cur.execute(statement, params)
     
     def _insert_row_data(self, data, cur):
-        if self._db._dbapi.paramstyle == 'qmark':
-            param_marker = '?'
-        elif self._db._dbapi.paramstyle in ['format', 'pyformat']:
-            param_marker = '%s'
+        if self._db._dbapi.paramstyle == "qmark":
+            param_marker = "?"
+        elif self._db._dbapi.paramstyle in ["format", "pyformat"]:
+            param_marker = "%s"
         else:
-            raise InsertError('DBAPI module has unsupported parameter style.')
+            raise InsertError("DBAPI module has unsupported parameter style.")
         
-        statement = self._statement_base + ' VALUES ({0})'.format(','.join(param_marker for _ in self._columns))
+        statement = self._statement_base + " VALUES ({0})".format(",".join(param_marker for _ in self._columns))
         
         cur.executemany(statement, data)
 
@@ -96,7 +96,7 @@ class Update(object):
         :param db: The database to perform the update on.
         """
         if db is None:
-            raise UpdateError('Attempting to update without a database.')
+            raise UpdateError("Attempting to update without a database.")
         
         self._db = db
         self._statement = statement
@@ -122,7 +122,7 @@ class Update(object):
     
     def show(self):
         """Show the constructed SQL statement for this update."""
-        print(self._statement, self._params, sep='\n')
+        print(self._statement, self._params, sep="\n")
 
 class Delete(object):
     """Represents a database delete."""
@@ -135,7 +135,7 @@ class Delete(object):
         :param db: The database to perform the delete on.
         """
         if db is None:
-            raise DeleteError('Attempting to delete without a database.')
+            raise DeleteError("Attempting to delete without a database.")
         
         self._db = db
         self._statement = statement
@@ -161,4 +161,4 @@ class Delete(object):
     
     def show(self):
         """Show the constructed SQL statement for this delete."""
-        print(self._statement, self._params, sep='\n')
+        print(self._statement, self._params, sep="\n")

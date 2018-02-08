@@ -26,49 +26,49 @@ class _Aggregator(_ValueExpr):
         return self._expr._get_tables()
 
 class Count_(_Aggregator):
-    """SQL 'COUNT' aggregate function.
+    """SQL "COUNT" aggregate function.
     
     Finds the number of non-null values in the expression provided.
     """
     
     def _get_ref_field(self):
-        return 'COUNT({})'.format(self._expr._get_ref_field())
+        return "COUNT({})".format(self._expr._get_ref_field())
 
 class Min_(_Aggregator):
-    """SQL 'MIN' aggregate function.
+    """SQL "MIN" aggregate function.
     
     Finds the minimum value from the expression provided.
     """
     
     def _get_ref_field(self):
-        return 'MIN({})'.format(self._expr._get_ref_field())
+        return "MIN({})".format(self._expr._get_ref_field())
 
 class Max_(_Aggregator):
-    """SQL 'MAX' aggregate function.
+    """SQL "MAX" aggregate function.
     
     Finds the maximum value from the expression provided.
     """
     
     def _get_ref_field(self):
-        return 'MAX({})'.format(self._expr._get_ref_field())
+        return "MAX({})".format(self._expr._get_ref_field())
 
 class Sum_(_Aggregator):
-    """SQL 'SUM' aggregate function.
+    """SQL "SUM" aggregate function.
     
     Finds the sum of all values in the expression provided.
     """
     
     def _get_ref_field(self):
-        return 'SUM({})'.format(self._expr._get_ref_field())
+        return "SUM({})".format(self._expr._get_ref_field())
 
 class Avg_(_Aggregator):
-    """SQL 'AVG' aggregate function.
+    """SQL "AVG" aggregate function.
     
     Finds the average of all values in the expression provided.
     """
     
     def _get_ref_field(self):
-        return 'AVG({})'.format(self._expr._get_ref_field())
+        return "AVG({})".format(self._expr._get_ref_field())
 
 class RecordCount(Selectable):
     """Count of the records in the tables of the query."""
@@ -77,7 +77,7 @@ class RecordCount(Selectable):
         return None
     
     def _get_select_field(self):
-        return 'COUNT(*)'
+        return "COUNT(*)"
     
     def _get_params(self):
         return tuple()

@@ -24,7 +24,7 @@ class Query(TableExpression):
         :param params: The parameters to pass to the cursor along with the SQL.
         """
         if db is None:
-            raise QueryError('Attempting to query without a database.')
+            raise QueryError("Attempting to query without a database.")
         
         self._db = db
         
@@ -33,7 +33,7 @@ class Query(TableExpression):
         self._params = params
         
         self._columns = _QueryColumnCollection(self)
-        self._return_type = namedtuple('QueryResult_'+str(id(self)),
+        self._return_type = namedtuple("QueryResult_"+str(id(self)),
             self._columns.getNames(), rename=True)
     
     @property
@@ -53,9 +53,9 @@ class Query(TableExpression):
         statement = self._statement
         if limit is not None:
             if offset is not None:
-                statement += '\nLIMIT {0} OFFSET {0}'.format(limit, offset)
+                statement += "\nLIMIT {0} OFFSET {0}".format(limit, offset)
             else:
-                statement += '\nLIMIT ' +str(limit)
+                statement += "\nLIMIT " +str(limit)
         
         results = []
         
@@ -75,7 +75,7 @@ class Query(TableExpression):
     
     def show(self):
         """Show the constructed SQL statement for this query."""
-        print(self._statement, self._params, sep='\n')
+        print(self._statement, self._params, sep="\n")
     
     def getColumn(self, key):
         return self._columns[key]
@@ -88,7 +88,7 @@ class Query(TableExpression):
         return self._return_type._make(r)
     
     def _get_from_field(self):
-        return '({})'.format(self._statement)
+        return "({})".format(self._statement)
     
     def _get_selectables(self):
         return [ self._columns[name] for name in self._columns.getNames() ]

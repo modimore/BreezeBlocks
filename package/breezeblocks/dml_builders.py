@@ -6,7 +6,7 @@ from .sql.dml import Insert, Update, Delete
 class InsertBuilder(object):
     def __init__(self, table, columns=[], db=None):
         if db is None:
-            raise InsertError('Attempting to build an insert statement without a database.')
+            raise InsertError("Attempting to build an insert statement without a database.")
         
         self._db = db
         self._table = table
@@ -40,15 +40,15 @@ class InsertBuilder(object):
         return Insert(self._construct_sql(), self._table, self._column_names, db=self._db)
     
     def _construct_sql(self):
-        return 'INSERT INTO {0} ({1})'.format(
+        return "INSERT INTO {0} ({1})".format(
             self._table.name,
-            ','.join(self._column_names)
+            ",".join(self._column_names)
         )
 
 class UpdateBuilder(object):
     def __init__(self, table, db=None):
         if db is None:
-            raise UpdateError('Attempting to build an update statement without a database.')
+            raise UpdateError("Attempting to build an update statement without a database.")
         
         self._db = db
         self._table = table
@@ -94,10 +94,10 @@ class UpdateBuilder(object):
         statement_buffer = StringIO()
         params = []
         
-        statement_buffer.write('UPDATE {} SET\n\t'.format(self._table.name))
+        statement_buffer.write("UPDATE {} SET\n\t".format(self._table.name))
         
-        statement_buffer.write(',\n\t'.join(
-            '{0} = {1}'.format(u[0].name, u[1]._get_ref_field())
+        statement_buffer.write(",\n\t".join(
+            "{0} = {1}".format(u[0].name, u[1]._get_ref_field())
             for u in self._updates
         ))
         for update in self._updates:
@@ -105,9 +105,9 @@ class UpdateBuilder(object):
             params.extend(update[1]._get_params())
         
         if len(self._conditions) > 0:
-            statement_buffer.write('\nWHERE ')
+            statement_buffer.write("\nWHERE ")
             
-            statement_buffer.write('\n  AND '.join(
+            statement_buffer.write("\n  AND ".join(
                 cond._get_ref_field() for cond in self._conditions))
             for cond in self._conditions:
                 params.extend(cond._get_params())
@@ -117,7 +117,7 @@ class UpdateBuilder(object):
 class DeleteBuilder(object):
     def __init__(self, table, db=None):
         if db is None:
-            raise DeleteError('Attemping to build a delete statement without a database.')
+            raise DeleteError("Attemping to build a delete statement without a database.")
         
         self._db = db
         self._table = table
@@ -146,12 +146,12 @@ class DeleteBuilder(object):
         statement_buffer = StringIO()
         params = []
         
-        statement_buffer.write('DELETE FROM {}'.format(self._table.name))
+        statement_buffer.write("DELETE FROM {}".format(self._table.name))
         
         if len(self._conditions) > 0:
-            statement_buffer.write('\nWHERE ')
+            statement_buffer.write("\nWHERE ")
             
-            statement_buffer.write('\n  AND '.join(
+            statement_buffer.write("\n  AND ".join(
                 cond._get_ref_field() for cond in self._conditions))
             for cond in self._conditions:
                 params.extend(cond._get_params())

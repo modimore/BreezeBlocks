@@ -31,7 +31,7 @@ class ColumnCollection(object):
         if isinstance(key, str):
             return self._columns[key]
         else:
-            raise TypeError('Column Collections require strings for column names.')
+            raise TypeError("Column Collections require strings for column names.")
     
     def __getitem__(self, key):
         return self._get_column(key)

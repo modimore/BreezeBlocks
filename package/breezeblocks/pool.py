@@ -50,7 +50,7 @@ class PooledConnection(object):
         """Allocates a cursor from the underlying connection.
         
         Also store a weak-reference to this cursor so it can be
-        closed when the connection is 'closed'.
+        closed when the connection is "closed".
         """
         cursor = self._conn.cursor()
         self._cursor_refs.append(weakref.ref(cursor))

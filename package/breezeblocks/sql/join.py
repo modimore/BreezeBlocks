@@ -56,7 +56,7 @@ class _Join(TableExpression):
     
     def getColumn(self, key):
         if not isinstance(key, str):
-            raise TypeError('Tables require strings for lookup keys.')
+            raise TypeError("Tables require strings for lookup keys.")
         
         if key in self._left._columns:
             return self._left[key]
@@ -93,34 +93,34 @@ class _Join(TableExpression):
         raise NotImplementedError()
 
 class _QualifiedJoin(_Join):
-    """Represents a join with a 'USING' or 'ON' condition."""
+    """Represents a join with a "USING" or "ON" condition."""
     
     def __init__(self, left, right, *, on=None, using=None):
         super().__init__(left, right)
         
         if on is None and using is None:
             raise QueryError(
-            'Qualified Join statements must have an ON or a USING condition.')
+            "Qualified Join statements must have an ON or a USING condition.")
         
         if on is not None and using is not None:
             raise QueryError(
-                'Join statement cannot have both ON and USING conditions.')
+                "Join statement cannot have both ON and USING conditions.")
         
         self._on_exprs = on
         self._using_fields = using
     
     def _get_from_field(self):
-        return self._get_join_expression() + ' ' + self._get_join_condition()
+        return self._get_join_expression() + " " + self._get_join_condition()
     
     def _get_join_condition(self):
         if self._on_exprs is not None:
-            return 'ON {}'.format(
-                ', '.join(expr._get_ref_field() for expr in self._on_exprs))
+            return "ON {}".format(
+                ", ".join(expr._get_ref_field() for expr in self._on_exprs))
         elif self._using_fields is not None:
-            return 'USING ({})'.format(', '.join(self._using_fields))
+            return "USING ({})".format(", ".join(self._using_fields))
         else:
             raise QueryError(
-                'A join condition must be specified for qualified joins.')
+                "A join condition must be specified for qualified joins.")
 
 class CrossJoin(_Join):
     """Represents a cross join of two table expressions."""
@@ -129,33 +129,33 @@ class CrossJoin(_Join):
         return self._get_join_expression()
     
     def _get_join_expression(self):
-        return '{} CROSS JOIN {}'.format(
+        return "{} CROSS JOIN {}".format(
             self._left._get_from_field(), self._right._get_from_field())
 
 class InnerJoin(_QualifiedJoin):
     """Represents an inner join of two table expressions."""
     
     def _get_join_expression(self):
-        return '{} INNER JOIN {}'.format(
+        return "{} INNER JOIN {}".format(
             self._left._get_from_field(), self._right._get_from_field())
 
 class LeftJoin(_QualifiedJoin):
     """Represents a left outer join of two table expressions."""
     
     def _get_join_expression(self):
-        return '{} LEFT JOIN {}'.format(
+        return "{} LEFT JOIN {}".format(
             self._left._get_from_field(), self._right._get_from_field())
 
 class RightJoin(_QualifiedJoin):
     """Represents a right outer join of two table expressions."""
     
     def _get_join_expression(self):
-        return '{} RIGHT JOIN {}'.format(
+        return "{} RIGHT JOIN {}".format(
             self._left._get_from_field(), self._right._get_from_field())
 
 class OuterJoin(_QualifiedJoin):
     """Represents a full outer join of two table expressions."""
     
     def _get_join_expression(self):
-        return '{} OUTER JOIN {}'.format(
+        return "{} OUTER JOIN {}".format(
             self._left._get_from_field(), self._right._get_from_field())

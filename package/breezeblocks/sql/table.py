@@ -9,7 +9,7 @@ class Table(TableExpression):
         """Initializes a table."""
         # Construct table's qualified name
         if schema is not None:
-            self.name = '.'.join([schema, table_name])
+            self.name = ".".join([schema, table_name])
         else:
             self.name = table_name
         
@@ -20,7 +20,7 @@ class Table(TableExpression):
         
         Hash is generated from the table's qualifed name.
         
-        qualifed_name := [schema_name '.'] table_name
+        qualifed_name := [schema_name "."] table_name
         
         :return: The computed hash value.
         """
@@ -102,7 +102,7 @@ class AliasedTableExpression(TableExpression):
         This field includes both the table's original from field and the
         new alias.
         """
-        return '{} AS {}'.format(
+        return "{} AS {}".format(
             self._table_expr._get_from_field(), self.name)
     
     def _get_selectables(self):
