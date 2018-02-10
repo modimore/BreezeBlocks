@@ -16,8 +16,8 @@ class _Aggregator(_ValueExpr):
         # Aggregates do not by default have names.
         return None
     
-    def _get_select_field(self):
-        return self._get_ref_field()
+    def _get_select_field(self, db):
+        return self._get_ref_field(db)
     
     def _get_params(self):
         return self._expr._get_params()
@@ -31,8 +31,8 @@ class Count_(_Aggregator):
     Finds the number of non-null values in the expression provided.
     """
     
-    def _get_ref_field(self):
-        return "COUNT({})".format(self._expr._get_ref_field())
+    def _get_ref_field(self, db):
+        return "COUNT({})".format(self._expr._get_ref_field(db))
 
 class Min_(_Aggregator):
     """SQL "MIN" aggregate function.
@@ -40,8 +40,8 @@ class Min_(_Aggregator):
     Finds the minimum value from the expression provided.
     """
     
-    def _get_ref_field(self):
-        return "MIN({})".format(self._expr._get_ref_field())
+    def _get_ref_field(self, db):
+        return "MIN({})".format(self._expr._get_ref_field(db))
 
 class Max_(_Aggregator):
     """SQL "MAX" aggregate function.
@@ -49,8 +49,8 @@ class Max_(_Aggregator):
     Finds the maximum value from the expression provided.
     """
     
-    def _get_ref_field(self):
-        return "MAX({})".format(self._expr._get_ref_field())
+    def _get_ref_field(self, db):
+        return "MAX({})".format(self._expr._get_ref_field(db))
 
 class Sum_(_Aggregator):
     """SQL "SUM" aggregate function.
@@ -58,8 +58,8 @@ class Sum_(_Aggregator):
     Finds the sum of all values in the expression provided.
     """
     
-    def _get_ref_field(self):
-        return "SUM({})".format(self._expr._get_ref_field())
+    def _get_ref_field(self, db):
+        return "SUM({})".format(self._expr._get_ref_field(db))
 
 class Avg_(_Aggregator):
     """SQL "AVG" aggregate function.
@@ -67,8 +67,8 @@ class Avg_(_Aggregator):
     Finds the average of all values in the expression provided.
     """
     
-    def _get_ref_field(self):
-        return "AVG({})".format(self._expr._get_ref_field())
+    def _get_ref_field(self, db):
+        return "AVG({})".format(self._expr._get_ref_field(db))
 
 class RecordCount(Selectable):
     """Count of the records in the tables of the query."""
@@ -76,7 +76,7 @@ class RecordCount(Selectable):
     def _get_name(self):
         return None
     
-    def _get_select_field(self):
+    def _get_select_field(self, db):
         return "COUNT(*)"
     
     def _get_params(self):

@@ -13,11 +13,11 @@ class _JoinColumn(_ValueExpr):
     def _get_name(self):
         return self._column_expr._get_name()
     
-    def _get_ref_field(self):
-        return self._column_expr._get_ref_field()
+    def _get_ref_field(self, db):
+        return self._column_expr._get_ref_field(db)
     
-    def _get_select_field(self):
-        return self._column_expr._get_select_field()
+    def _get_select_field(self, db):
+        return self._column_expr._get_select_field(db)
     
     def _get_tables(self):
         return set((self._join_expr,))
@@ -115,7 +115,7 @@ class _QualifiedJoin(_Join):
     def _get_join_condition(self):
         if self._on_exprs is not None:
             return "ON {}".format(
-                ", ".join(expr._get_ref_field() for expr in self._on_exprs))
+                ", ".join(expr._get_ref_field(db) for expr in self._on_exprs))
         elif self._using_fields is not None:
             return "USING ({})".format(", ".join(self._using_fields))
         else:

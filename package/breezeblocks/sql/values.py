@@ -7,10 +7,10 @@ class FormatStyleValue(ConstantExpr):
     Placeholders in queries will appear as "%s".
     """
     
-    def _get_ref_field(self):
+    def _get_ref_field(self, db):
         return "%s"
     
-    def _get_select_field(self):
+    def _get_select_field(self, db):
         return "%s"
 
 class PyFormatStyleValue(ConstantExpr):
@@ -20,10 +20,10 @@ class PyFormatStyleValue(ConstantExpr):
     Support for named paramaters has not been implemented.
     """
     
-    def _get_ref_field(self):
+    def _get_ref_field(self, db):
         return "%s"
     
-    def _get_select_field(self):
+    def _get_select_field(self, db):
         return "%s"
 
 class QmarkStyleValue(ConstantExpr):
@@ -32,8 +32,8 @@ class QmarkStyleValue(ConstantExpr):
     Placeholders in queries will appear as "?".
     """
     
-    def _get_ref_field(self):
+    def _get_ref_field(self, db):
         return "?"
     
-    def _get_select_field(self):
+    def _get_select_field(self, db):
         return "?"

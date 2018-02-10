@@ -5,6 +5,7 @@ from .sql.query import Query
 from .sql.query_components import Referenceable
 from .sql.query_components import Selectable
 from .sql.query_components import TableExpression
+from .sql.value import Value
 
 
 class QueryBuilder(object):
@@ -38,7 +39,7 @@ class QueryBuilder(object):
                 self._state.select_exprs.extend(
                     expr._get_selectables())
             else:
-                raise QueryError("Invalid select argument - {!r}".format(expr))
+                self._state.select_exprs.append(Value(expr))
         
         return self
     
@@ -172,7 +173,7 @@ class QueryBuilder(object):
             query_buffer.write("SELECT\n\t")
         query_buffer.write(
             ",\n\t".join(
-                e._get_select_field() for e in self._state.select_exprs))
+                e._get_select_field(self._db) for e in self._state.select_exprs))
         for expr in self._state.select_exprs:
             params.extend(expr._get_params())
         
@@ -189,7 +190,7 @@ class QueryBuilder(object):
             query_buffer.write("\nWHERE ")
             query_buffer.write(
                 "\n  AND ".join(
-                    cond._get_ref_field() for cond in self._state.where_conds))
+                    cond._get_ref_field(self._db) for cond in self._state.where_conds))
             for cond in self._state.where_conds:
                 params.extend(cond._get_params())
         
@@ -198,7 +199,7 @@ class QueryBuilder(object):
             query_buffer.write("\nGROUP BY\n\t")
             query_buffer.write(
                 ",\n\t".join(
-                    expr._get_ref_field() for expr in self._state.group_exprs))
+                    expr._get_ref_field(self._db) for expr in self._state.group_exprs))
         
         # Construct the "HAVING" portion, if used.
         if len(self._state.having_conds) > 0:
@@ -211,14 +212,14 @@ class QueryBuilder(object):
             query_buffer.write("\nHAVING ")
             query_buffer.write(
                 "\n   AND ".join(
-                    cond._get_ref_field() for cond in self._state.having_conds))
+                    cond._get_ref_field(self._db) for cond in self._state.having_conds))
             for cond in self._state.having_conds:
                 params.extend(cond._get_params())
         
         if len(self._state.orderings) > 0:
             query_buffer.write("\nORDER BY ")
             query_buffer.write(", ".join(
-                order._get_order_spec() for order in self._state.orderings))
+                order._get_order_spec(self._db) for order in self._state.orderings))
             for order in self._state.orderings:
                 params.extend(order._get_params())
         
@@ -255,16 +256,16 @@ class _QueryOrdering(object):
             raise QueryError("NULLS in an order by clause can only be \"FIRST\" or \"LAST\"")
         self._nulls = nulls
     
-    def _get_order_spec(self):
+    def _get_order_spec(self, db):
         if self._nulls is not None:
             return "{0} {1} NULLS {2}".format(
-                self._expr._get_ref_field(),
+                self._expr._get_ref_field(db),
                 "ASC" if self._ascending else "DESC",
                 self._nulls
             )
         else:
             return "{0} {1}".format(
-                self._expr._get_ref_field(),
+                self._expr._get_ref_field(db),
                 "ASC" if self._ascending else "DESC"
             )
     

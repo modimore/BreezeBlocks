@@ -1,4 +1,4 @@
-from .exceptions import MissingModuleError
+from .exceptions import MissingModuleError, UnsupportedModuleError
 from .pool import ConnectionPool as Pool
 from .query_builder import QueryBuilder
 from .dml_builders import InsertBuilder, UpdateBuilder, DeleteBuilder
@@ -24,6 +24,8 @@ class Database(object):
         
         if self._dbapi is None:
             raise MissingModuleError()
+        
+        self._param_marker = _get_param_marker(self._dbapi)
         
         connect_args = connect_args if connect_args is not None else []
         connect_kwargs = connect_kwargs if connect_kwargs is not None else {}
@@ -71,3 +73,13 @@ class Database(object):
         """Returns a new connection to the database."""
         return self._dbapi.connect(self._dsn,
             *self._connection_args, **self._connection_kwargs)
+
+def _get_param_marker(dbapi_module):
+    if dbapi_module.paramstyle == "qmark":
+        return "?"
+    elif dbapi_module.paramstyle == "format":
+        return "%s"
+    elif dbapi_module.paramstyle == "pyformat":
+        return "%s"
+    else:
+        raise UnsupportedModuleError()

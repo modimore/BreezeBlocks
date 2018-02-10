@@ -131,10 +131,10 @@ class _QueryColumn(_ValueExpr):
     def _get_name(self):
         return self._column._get_name()
     
-    def _get_ref_field(self):
+    def _get_ref_field(self, db):
         return self._get_name()
     
-    def _get_select_field(self):
+    def _get_select_field(self, db):
         return self._get_name()
     
     def _get_tables(self):

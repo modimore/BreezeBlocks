@@ -36,48 +36,48 @@ class _SubqueryOperator(_Operator):
 class Or_(_ChainableOperator):
     """SQL `OR` operator."""
     
-    def _get_ref_field(self):
+    def _get_ref_field(self, db):
         return " OR ".join(
-            ["({})".format(expr._get_ref_field()) for expr in self._operands])
+            ["({})".format(expr._get_ref_field(db)) for expr in self._operands])
 
 class And_(_ChainableOperator):
     """SQL `AND` operator."""
     
-    def _get_ref_field(self):
+    def _get_ref_field(self, db):
         return " AND ".join(
-            ["({})".format(expr._get_ref_field()) for expr in self._operands])
+            ["({})".format(expr._get_ref_field(db)) for expr in self._operands])
 
 class Not_(_UnaryOperator):
     """SQL `NOT` operator."""
     
-    def _get_ref_field(self):
-        return "NOT ({})".format(self._operand._get_ref_field())
+    def _get_ref_field(self, db):
+        return "NOT ({})".format(self._operand._get_ref_field(db))
 
 class Is_(_BinaryOperator):
     """SQL `IS` operator."""
     
-    def _get_ref_field(self):
+    def _get_ref_field(self, db):
         return "({}) IS ({})".format(
-            self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
 
 class IsNull_(_UnaryOperator):
     """SQL `IS NULL` operator."""
     
-    def _get_ref_field(self):
-        return "({}) IS NULL".format(self._operand._get_ref_field())
+    def _get_ref_field(self, db):
+        return "({}) IS NULL".format(self._operand._get_ref_field(db))
 
 class NotNull_(_UnaryOperator):
     """SQL `IS NOT NULL` operator."""
     
-    def _get_ref_field(self):
-        return "({}) IS NOT NULL".format(self._operand._get_ref_field())
+    def _get_ref_field(self, db):
+        return "({}) IS NOT NULL".format(self._operand._get_ref_field(db))
 
 class In_(_SubqueryOperator):
     """SQL `IN` operator."""
     
-    def _get_ref_field(self):
+    def _get_ref_field(self, db):
         return "({}) IN ({})".format(
-            self._l_expr._get_ref_field(), self._r_query._get_from_field())
+            self._l_expr._get_ref_field(db), self._r_query._get_from_field())
 
 class Between_(_Operator):
     """SQL `BETWEEN` operator.
@@ -90,11 +90,11 @@ class Between_(_Operator):
         self._low = low
         self._high = high
     
-    def _get_ref_field(self):
+    def _get_ref_field(self, db):
         return "({}) BETWEEN ({}) AND ({})".format(
-            self._comp_expr._get_ref_field(),
-            self._low._get_ref_field(),
-            self._high._get_ref_field())
+            self._comp_expr._get_ref_field(db),
+            self._low._get_ref_field(db),
+            self._high._get_ref_field(db))
     
     def _get_params(self):
         params = []
@@ -116,9 +116,9 @@ class Like_(_BinaryOperator):
     Performs a string comparison with support for two wildcards.
     """
     
-    def _get_ref_field(self):
+    def _get_ref_field(self, db):
         return "({}) LIKE ({})".format(
-            self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
 
 class SimilarTo_(_BinaryOperator):
     """SQL `SIMILAR TO` operator.
@@ -129,6 +129,6 @@ class SimilarTo_(_BinaryOperator):
     
     def _ref_field(self):
         return "({}) SIMILAR TO ({})".format(
-            self._lhs._get_ref_field(), self._rhs._get_ref_field())
+            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
 
 # (any other operator)

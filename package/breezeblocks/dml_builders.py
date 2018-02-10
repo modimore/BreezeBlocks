@@ -97,7 +97,7 @@ class UpdateBuilder(object):
         statement_buffer.write("UPDATE {} SET\n\t".format(self._table.name))
         
         statement_buffer.write(",\n\t".join(
-            "{0} = {1}".format(u[0].name, u[1]._get_ref_field())
+            "{0} = {1}".format(u[0].name, u[1]._get_ref_field(self._db))
             for u in self._updates
         ))
         for update in self._updates:
@@ -108,7 +108,7 @@ class UpdateBuilder(object):
             statement_buffer.write("\nWHERE ")
             
             statement_buffer.write("\n  AND ".join(
-                cond._get_ref_field() for cond in self._conditions))
+                cond._get_ref_field(self._db) for cond in self._conditions))
             for cond in self._conditions:
                 params.extend(cond._get_params())
         
@@ -152,7 +152,7 @@ class DeleteBuilder(object):
             statement_buffer.write("\nWHERE ")
             
             statement_buffer.write("\n  AND ".join(
-                cond._get_ref_field() for cond in self._conditions))
+                cond._get_ref_field(self._db) for cond in self._conditions))
             for cond in self._conditions:
                 params.extend(cond._get_params())
         

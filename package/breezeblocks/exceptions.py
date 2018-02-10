@@ -27,6 +27,17 @@ class MissingModuleError(BreezeBlocksError):
     def __repr__(self):
         return "BreezeBlocks Error: No DBAPI module provided or detected."
 
+class UnsupportedModuleError(BreezeBlocksError):
+    """An error occuring when the provided DBAPI module is not fully supported.
+    
+    This error generally means that the use case is intended to be supported,
+    and the same code is expected to not cause an error in the future, assuming
+    correct use of the package.
+    """
+    
+    def __repr__(self):
+        return "BreezeBlocks Error: DBAPI module not fully supported."
+
 class QueryError(BreezeBlocksError):
     """An error occuring during creation of a query."""
     
