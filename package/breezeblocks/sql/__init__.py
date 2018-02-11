@@ -5,5 +5,6 @@ This includes representations of fundamental parts of the schema
 such as tables and columns, as well as the expressions allowed in
 queries.
 """
+from .expressions import Value
 from .table import Table
 from .query import Query

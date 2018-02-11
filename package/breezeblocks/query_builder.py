@@ -1,11 +1,11 @@
 from .exceptions import QueryError
 
+from .sql import Value
 from .sql.column_collection import ColumnCollection
 from .sql.query import Query
 from .sql.query_components import Referenceable
 from .sql.query_components import Selectable
 from .sql.query_components import TableExpression
-from .sql.value import Value
 
 
 class QueryBuilder(object):

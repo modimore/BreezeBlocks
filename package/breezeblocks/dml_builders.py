@@ -1,7 +1,9 @@
 from io import StringIO
 
 from .exceptions import InsertError, UpdateError, DeleteError
+from .sql import Value
 from .sql.dml import Insert, Update, Delete
+from .sql.expressions import _fix_expression
 
 class InsertBuilder(object):
     def __init__(self, table, columns=[], db=None):
@@ -63,19 +65,19 @@ class UpdateBuilder(object):
         statement, params = self._construct_sql()
         return Update(statement, params, self._db)
     
-    def set_(self, column, value):
+    def set_(self, column, expr):
         """Adds a column-value pair to the update statement.
         
         :param column: A column in the table to set to a value.
             Column names as strings and `Column` objects are accepted.
-        :param value: An expression to set the column value to.
+        :param expr: An expression to set the column value to.
         
         :return: `self` for method chaining.
         """
         if isinstance(column, str):
             column = self._table.columns[column]
         
-        self._updates.append((column, value))
+        self._updates.append((column, _fix_expression(expr)))
         
         return self
     

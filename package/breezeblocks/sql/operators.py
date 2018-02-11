@@ -8,6 +8,7 @@ on expressions. They are imported here for convenience anyway.
 from .expressions import _Operator
 # Operators accounting for number of arguments.
 from .expressions import _UnaryOperator, _BinaryOperator, _ChainableOperator
+from .expressions import _fix_expression
 
 # Concrete operators implemented in expressions module.
 # Comparisons
@@ -21,7 +22,7 @@ from .expressions import UnaryPlus_, UnaryMinus_
 
 class _SubqueryOperator(_Operator):
     def __init__(self, l_expr, r_query):
-        self._l_expr = l_expr
+        self._l_expr = _fix_expression(l_expr)
         self._r_query = r_query
     
     def _get_tables(self):
@@ -86,9 +87,9 @@ class Between_(_Operator):
     """
     
     def __init__(self, comp_expr, low, high):
-        self._comp_expr = comp_expr
-        self._low = low
-        self._high = high
+        self._comp_expr = _fix_expression(comp_expr)
+        self._low = _fix_expression(low)
+        self._high = _fix_expression(high)
     
     def _get_ref_field(self, db):
         return "({}) BETWEEN ({}) AND ({})".format(

@@ -117,7 +117,7 @@ class _AliasedExpr(Selectable):
     def _get_tables(self):
         return self._expr._get_tables()
 
-class ConstantExpr(_ValueExpr):
+class Value(_ValueExpr):
     """A constant value or literal for safe use in a query."""
     
     def __init__(self, value):
@@ -141,6 +141,15 @@ class ConstantExpr(_ValueExpr):
     
     def _get_tables(self):
         return set()
+
+class ConstantExpr(Value):
+    pass
+
+def _fix_expression(expr):
+    if isinstance(expr, _ValueExpr):
+        return expr
+    else:
+        return Value(expr)
 
 # Abstract Operators start here.
 
@@ -171,7 +180,7 @@ class _UnaryOperator(_Operator):
     """SQL Unary Operator"""
     
     def __init__(self, operand):
-        self._operand = operand
+        self._operand = _fix_expression(operand)
     
     def _get_params(self):
         return self._operand._get_params()
@@ -183,8 +192,8 @@ class _BinaryOperator(_Operator):
     """SQL Binary Operator"""
     
     def __init__(self, lhs, rhs):
-        self._lhs = lhs
-        self._rhs = rhs
+        self._lhs = _fix_expression(lhs)
+        self._rhs = _fix_expression(rhs)
     
     def _get_params(self):
         result = []
@@ -206,7 +215,7 @@ class _ChainableOperator(_Operator):
     """
     
     def __init__(self, *operands):
-        self._operands = operands
+        self._operands = [_fix_expression(expr) for expr in operands]
     
     def _get_params(self):
         result = []
