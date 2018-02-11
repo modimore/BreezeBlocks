@@ -27,8 +27,8 @@ class Database(object):
         
         self._param_marker = _get_param_marker(self._dbapi)
         
-        connect_args = connect_args if connect_args is not None else []
-        connect_kwargs = connect_kwargs if connect_kwargs is not None else {}
+        connect_args = list(connect_args) if connect_args is not None else []
+        connect_kwargs = dict(connect_kwargs) if connect_kwargs is not None else {}
         
         if dsn is not None:
             connect_args.insert(0, dsn)
