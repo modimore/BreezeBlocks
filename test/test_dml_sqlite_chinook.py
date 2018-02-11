@@ -3,7 +3,7 @@ from unittest.mock import patch, Mock
 import sqlite3
 from breezeblocks import Database, Table
 from breezeblocks.sql.operators import Equal_, Like_
-from breezeblocks.sql.values import QmarkStyleValue as Value
+from breezeblocks.sql import Value
 
 import os
 DB_URL = os.path.join(os.path.dirname(__file__), 'Chinook.sqlite')
@@ -36,7 +36,7 @@ class SQLiteChinookTests(unittest.TestCase):
         cur = conn.cursor()
         
         q = self.db.query(self.tables['Artist'].columns['Name'])\
-            .where(Equal_(self.tables['Artist'].columns['Name'], Value('Weezer')))\
+            .where(Equal_(self.tables['Artist'].columns['Name'], 'Weezer'))\
             .get()
         
         rows = q.execute(conn=conn)
@@ -52,21 +52,21 @@ class SQLiteChinookTests(unittest.TestCase):
         conn = self.db.pool.get()
         
         genre_id = self.db.query(t_genre.columns['GenreId'])\
-            .where(t_genre.columns['Name'] == Value('Jazz'))\
+            .where(t_genre.columns['Name'] == 'Jazz')\
             .get().execute(limit=1)[0].GenreId
         
         # Setting up the initial playlist row
         self.db.insert(t_playlist).add_columns(t_playlist.columns['Name'])\
             .get().execute([('LP Jazz Mix',)], conn=conn)
         playlist_id = self.db.query(t_playlist.columns['PlaylistId'])\
-            .where(t_playlist.columns['Name'] == Value('LP Jazz Mix'))\
+            .where(t_playlist.columns['Name'] == 'LP Jazz Mix')\
             .get().execute(conn=conn)[0].PlaylistId
         
         # Testing the INSERT INTO SELECT
         i = self.db.insert(t_playlistTrack).add_columns('PlaylistId', 'TrackId')\
             .get()
         q = self.db.query(Value(playlist_id), t_track.columns['TrackId'])\
-            .where(t_track.columns['GenreId'] == Value(genre_id)).get()
+            .where(t_track.columns['GenreId'] == genre_id).get()
         
         i.execute(q, conn=conn)
         
@@ -82,22 +82,22 @@ class SQLiteChinookTests(unittest.TestCase):
         t_track = self.tables['Track']
         
         genre_id = self.db.query(t_genre.columns['GenreId'])\
-            .where(Equal_(t_genre.columns['Name'], Value('Pop')))\
+            .where(Equal_(t_genre.columns['Name'], 'Pop'))\
             .get().execute(limit=1)[0].GenreId
         album_id = self.db.query(t_album.columns['AlbumId'])\
-            .where(Equal_(t_album.columns['Title'], Value('American Idiot')))\
+            .where(Equal_(t_album.columns['Title'], 'American Idiot'))\
             .get().execute()[0].AlbumId
         conn = self.db.pool.get()
         
         # This album was recorded in their Pop period
         u = self.db.update(t_track)\
-            .set_(t_track.columns['GenreId'], Value(genre_id))\
-            .where(Equal_(t_track.columns['AlbumId'], Value(album_id))).get()
+            .set_(t_track.columns['GenreId'], genre_id)\
+            .where(Equal_(t_track.columns['AlbumId'], album_id)).get()
         
         u.execute(conn=conn)
         
         q = self.db.query(t_track.columns['GenreId'])\
-            .where(Equal_(t_track.columns['AlbumId'], Value(album_id))).get()
+            .where(Equal_(t_track.columns['AlbumId'], album_id)).get()
         
         for row in q.execute(conn=conn):
             self.assertEqual(row.GenreId, genre_id)
@@ -107,13 +107,13 @@ class SQLiteChinookTests(unittest.TestCase):
         
         # My episodes of Lost are just taking up too much space on my HDD
         d = self.db.delete(self.tables['Album']).where(
-            Like_(self.tables['Album'].columns['Title'], Value('Lost, Season%'))
+            Like_(self.tables['Album'].columns['Title'], 'Lost, Season%')
         ).get()
         
         d.execute(conn)
         
         q = self.db.query(self.tables['Album'].columns['AlbumId']).where(
-            Like_(self.tables['Album'].columns['Title'], Value('Lost, Season%'))
+            Like_(self.tables['Album'].columns['Title'], 'Lost, Season%')
         ).get()
         
         rows = q.execute(conn=conn)

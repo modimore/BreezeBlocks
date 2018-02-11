@@ -5,7 +5,7 @@ from breezeblocks.exceptions import QueryError
 from breezeblocks.sql.aggregates import Count_, RecordCount
 from breezeblocks.sql.join import InnerJoin, LeftJoin, CrossJoin
 from breezeblocks.sql.operators import Equal_, In_
-from breezeblocks.sql.values import QmarkStyleValue as Value
+from breezeblocks.sql import Value
 
 import os
 DB_URL = os.path.join(os.path.dirname(__file__), 'Chinook.sqlite')
@@ -50,11 +50,11 @@ class SQLiteChinookTests(unittest.TestCase):
         tbl_genre = self.tables['Genre']
         tbl_track = self.tables['Track']
         genre_id = self.db.query(tbl_genre)\
-            .where(tbl_genre.getColumn('Name') == Value('Alternative & Punk'))\
+            .where(tbl_genre.getColumn('Name') == 'Alternative & Punk')\
             .get().execute()[0].GenreId
     
         q = self.db.query(tbl_track.getColumn('GenreId'))\
-                .where(tbl_track.getColumn('GenreId') == Value(genre_id))\
+                .where(tbl_track.getColumn('GenreId') == genre_id)\
                 .get()
     
         # Assertion checks that the where condition has been applied to
@@ -68,7 +68,7 @@ class SQLiteChinookTests(unittest.TestCase):
         tbl_track = self.tables['Track']
     
         genre_id = self.db.query(tbl_genre)\
-            .where(tbl_genre.getColumn('Name') == Value('Alternative & Punk'))\
+            .where(tbl_genre.getColumn('Name') == 'Alternative & Punk')\
             .get().execute()[0].GenreId
     
         q = self.db.query(tbl_album.getColumn('Title'))\
@@ -76,7 +76,7 @@ class SQLiteChinookTests(unittest.TestCase):
                     In_(
                         tbl_album.getColumn('AlbumId'),
                         self.db.query(tbl_track.getColumn('AlbumId'))\
-                            .where(tbl_track.getColumn('GenreId') == Value(genre_id)).get()
+                            .where(tbl_track.getColumn('GenreId') == genre_id).get()
                     )
                 ).get()
     
@@ -90,7 +90,7 @@ class SQLiteChinookTests(unittest.TestCase):
         tbl_artist = self.tables['Artist']
         
         artist_id = self.db.query(tbl_artist.getColumn('ArtistId'))\
-            .where(Equal_(tbl_artist.getColumn('Name'), Value('Queen')))\
+            .where(Equal_(tbl_artist.getColumn('Name'), 'Queen'))\
             .get().execute()[0].ArtistId
         
         musician = tbl_artist.as_('Musician')
@@ -106,7 +106,7 @@ class SQLiteChinookTests(unittest.TestCase):
         tbl_artist = self.tables['Artist']
         
         artist_id = self.db.query(tbl_artist.getColumn('ArtistId'))\
-            .where(Equal_(tbl_artist.getColumn('Name'), Value('Queen')))\
+            .where(Equal_(tbl_artist.getColumn('Name'), 'Queen'))\
             .get().execute()[0].ArtistId
         
         inner_q = self.db.query(tbl_album.getColumn('ArtistId'), tbl_album.getColumn('Title'))\
@@ -134,13 +134,13 @@ class SQLiteChinookTests(unittest.TestCase):
         
         q = self.db.query(tbl_track.getColumn('GenreId'), Count_(tbl_track.getColumn('TrackId')).as_('TrackCount'))\
             .group_by(tbl_track.getColumn('GenreId'))\
-            .having(Count_(tbl_track.getColumn('TrackId')) > Value(25)).get()
+            .having(Count_(tbl_track.getColumn('TrackId')) > 25).get()
         
         for row in q.execute():
             self.assertTrue(hasattr(row, 'GenreId'))
             self.assertTrue(hasattr(row, 'TrackCount'))
             self.assertLess(25, row.TrackCount,
-                'The track count should be greater than specified in the'\
+                'The track count should be greater than specified in the '
                 'having clause.'
             )
     
@@ -149,7 +149,7 @@ class SQLiteChinookTests(unittest.TestCase):
         
         with self.assertRaises(QueryError):
             self.db.query(tbl_track.getColumn('GenreId'), Count_(tbl_track.getColumn('TrackId')).as_('TrackCount'))\
-                .having(Count_(tbl_track.getColumn('TrackId')) > Value(25)).get()
+                .having(Count_(tbl_track.getColumn('TrackId')) > 25).get()
     
     def test_orderByAsc(self):
         tbl_artist = self.tables['Artist']
@@ -221,10 +221,10 @@ class SQLiteChinookTests(unittest.TestCase):
         tbl_track = self.tables['Track']
         
         q0 = self.db.query(tbl_track.getColumn('GenreId'))\
-            .where(tbl_track.getColumn('AlbumId') == Value(album_id)).get()
+            .where(tbl_track.getColumn('AlbumId') == album_id).get()
         
         q1 = self.db.query(tbl_track.getColumn('GenreId'))\
-            .where(tbl_track.getColumn('AlbumId') == Value(album_id))\
+            .where(tbl_track.getColumn('AlbumId') == album_id)\
             .distinct().get()
         
         genres0 = set(row.GenreId for row in q0.execute())
