@@ -65,7 +65,7 @@ class Selectable(object):
         """Should return a string describing this item for the select clause."""
         raise NotImplementedError()
     
-    def _get_params(self, db):
+    def _get_params(self):
         """Should return an iterable of all parameters for the query."""
         raise NotImplementedError()
     
