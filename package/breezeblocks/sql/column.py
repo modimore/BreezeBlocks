@@ -20,11 +20,11 @@ class ColumnExpr(_ValueExpr):
         """Provides the unqualifed column name as the select field name."""
         return self.name
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         """Returns a way to reference this column in a query."""
         return self.full_name
     
-    def _get_select_field(self, db):
+    def _get_select_field(self, param_store):
         """Returns the expression for selecting this column in a query."""
         return self.full_name
     
@@ -60,11 +60,11 @@ class AliasedColumnExpr(_ValueExpr):
     def _get_name(self):
         return self._alias
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         """Returns a way to reference this column in a query."""
         return self.full_name
     
-    def _get_select_field(self, db):
+    def _get_select_field(self, param_store):
         """Returns the expression for selecting this column in a
         query."""
         return "{} AS {}".format(

@@ -30,7 +30,7 @@ class TableExpression(object):
 class Referenceable(object):
     """An object that can be used as a reference field in a SQL query."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         """Should return a string describing this field.
         
         May be used in the WHERE, HAVING, or GROUP BY portions of a query.
@@ -61,7 +61,7 @@ class Selectable(object):
         """
         raise NotImplementedError()
     
-    def _get_select_field(self, db):
+    def _get_select_field(self, param_store):
         """Should return a string describing this item for the select clause."""
         raise NotImplementedError()
     

@@ -23,10 +23,10 @@ class _ValueExpr(Referenceable, Selectable):
     def __init__(self):
         raise NotImplementedError()
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         raise NotImplementedError()
     
-    def _get_select_field(self, db):
+    def _get_select_field(self, param_store):
         raise NotImplementedError()
     
     def _get_params(self):
@@ -107,9 +107,9 @@ class _AliasedExpr(Selectable):
     def _get_name(self):
         return self._alias
     
-    def _get_select_field(self, db):
+    def _get_select_field(self, param_store):
         return "{} AS {!s}".format(
-            self._expr._get_select_field(db), self._alias)
+            self._expr._get_select_field(param_store), self._alias)
     
     def _get_params(self):
         return self._expr._get_params()
@@ -120,24 +120,25 @@ class _AliasedExpr(Selectable):
 class Value(_ValueExpr):
     """A constant value or literal for safe use in a query."""
     
-    def __init__(self, value):
+    def __init__(self, value=None, *, param_name=None):
         """Sets value equal to the provided value."""
         self._value = value
+        self._param_name = param_name
     
     def _get_name(self):
         """Constant expressions do not have names."""
         return None
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         """Returns the parameter placeholder for the specified db."""
-        return db._param_marker
+        return param_store.get_param_marker(self)
     
-    def _get_select_field(self, db):
+    def _get_select_field(self, param_store):
         """Returns the parameter placeholder for the specified db."""
-        return self._get_ref_field(db)
+        return self._get_ref_field(param_store)
     
     def _get_params(self):
-        return (self._value,)
+        return (self,)
     
     def _get_tables(self):
         return set()
@@ -163,12 +164,12 @@ class _Operator(_ValueExpr):
         """Operators do not have names."""
         return None
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         raise NotImplementedError()
     
-    def _get_select_field(self, db):
+    def _get_select_field(self, param_store):
         """Selecting operators without aliases uses the reference field."""
-        return self._get_ref_field(db)
+        return self._get_ref_field(param_store)
     
     def _get_params(self):
         raise NotImplementedError()
@@ -231,95 +232,95 @@ class _ChainableOperator(_Operator):
 class Equal_(_BinaryOperator):
     """SQL `=` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return "({}) = ({})".format(
-            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
+            self._lhs._get_ref_field(param_store), self._rhs._get_ref_field(param_store))
 
 class NotEqual_(_BinaryOperator):
     """SQL `!=` or `<>` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return "({}) <> ({})".format(
-            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
+            self._lhs._get_ref_field(param_store), self._rhs._get_ref_field(param_store))
 
 class LessThan_(_BinaryOperator):
     """SQL `<` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return "({}) < ({})".format(
-            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
+            self._lhs._get_ref_field(param_store), self._rhs._get_ref_field(param_store))
 
 class GreaterThan_(_BinaryOperator):
     """SQL `>` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return "({}) > ({})".format(
-                self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
+                self._lhs._get_ref_field(param_store), self._rhs._get_ref_field(param_store))
 
 class LessThanEqual_(_BinaryOperator):
     """SQL `<=` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return "({}) <= ({})".format(
-            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
+            self._lhs._get_ref_field(param_store), self._rhs._get_ref_field(param_store))
 
 class GreaterThanEqual_(_BinaryOperator):
     """SQL `>=` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return "({}) >= ({})".format(
-            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
+            self._lhs._get_ref_field(param_store), self._rhs._get_ref_field(param_store))
 
 class Plus_(_ChainableOperator):
     """SQL `+` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return " + ".join(
-            ["({})".format(expr._get_ref_field(db)) for expr in self._operands])
+            ["({})".format(expr._get_ref_field(param_store)) for expr in self._operands])
 
 class Minus_(_BinaryOperator):
     """SQL `-` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return "({}) - ({})".format(
-            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
+            self._lhs._get_ref_field(param_store), self._rhs._get_ref_field(param_store))
 
 class Mult_(_ChainableOperator):
     """SQL `*` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return " * ".join(
-            ["({})".format(expr._get_ref_field(db)) for expr in self._operands])
+            ["({})".format(expr._get_ref_field(param_store)) for expr in self._operands])
 
 class Div_(_BinaryOperator):
     """SQL `/` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return "({}) / ({})".format(
-            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
+            self._lhs._get_ref_field(param_store), self._rhs._get_ref_field(param_store))
 
 class Mod_(_BinaryOperator):
     """SQL `%` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return "({}) % ({})".format(
-            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
+            self._lhs._get_ref_field(param_store), self._rhs._get_ref_field(param_store))
 
 class Exp_(_BinaryOperator):
     """SQL `^` operator."""
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return "({}) ^ ({})".format(
-            self._lhs._get_ref_field(db), self._rhs._get_ref_field(db))
+            self._lhs._get_ref_field(param_store), self._rhs._get_ref_field(param_store))
 
 class UnaryPlus_(_UnaryOperator):
     """SQL Unary `+` operator"""
     
-    def _get_ref_field(self, db):
-        return "+({})".format(self._operand._get_ref_field(db))
+    def _get_ref_field(self, param_store):
+        return "+({})".format(self._operand._get_ref_field(param_store))
 
 class UnaryMinus_(_UnaryOperator):
     """SQL Unary `-` operator"""
     
-    def _get_ref_field(self, db):
-        return "-({})".format(self._operand._get_ref_field(db))
+    def _get_ref_field(self, param_store):
+        return "-({})".format(self._operand._get_ref_field(param_store))

@@ -2,6 +2,7 @@ from .exceptions import QueryError
 
 from .sql import Value
 from .sql.column_collection import ColumnCollection
+from .sql.param_store import get_param_store
 from .sql.query import Query
 from .sql.query_components import Referenceable
 from .sql.query_components import Selectable
@@ -164,42 +165,42 @@ class QueryBuilder(object):
         from io import StringIO
         
         query_buffer = StringIO()
-        params = []
+        params = get_param_store(self._db._dbapi.paramstyle)
         
         # Construct the "SELECT" portion.
+        for expr in self._state.select_exprs:
+            params.add_params(expr._get_params())
         if self._state.distinct:
             query_buffer.write("SELECT DISTINCT\n\t")
         else:
             query_buffer.write("SELECT\n\t")
         query_buffer.write(
             ",\n\t".join(
-                e._get_select_field(self._db) for e in self._state.select_exprs))
-        for expr in self._state.select_exprs:
-            params.extend(expr._get_params())
+                e._get_select_field(params) for e in self._state.select_exprs))
         
         # Construct the "FROM" portion.
+        for t in self._state.from_relns:
+            params.add_params(t._get_params())
         query_buffer.write("\nFROM\n\t")
         query_buffer.write(
             ",\n\t".join(
                 t._get_from_field() for t in self._state.from_relns))
-        for t in self._state.from_relns:
-            params.extend(t._get_params())
         
         # Construct the "WHERE" portion, if used.
         if len(self._state.where_conds) > 0:
+            for cond in self._state.where_conds:
+                params.add_params(cond._get_params())
             query_buffer.write("\nWHERE ")
             query_buffer.write(
                 "\n  AND ".join(
-                    cond._get_ref_field(self._db) for cond in self._state.where_conds))
-            for cond in self._state.where_conds:
-                params.extend(cond._get_params())
+                    cond._get_ref_field(params) for cond in self._state.where_conds))
         
         # Construct the "GROUP BY" portion, if used.
         if len(self._state.group_exprs) > 0:
             query_buffer.write("\nGROUP BY\n\t")
             query_buffer.write(
                 ",\n\t".join(
-                    expr._get_ref_field(self._db) for expr in self._state.group_exprs))
+                    expr._get_ref_field(params) for expr in self._state.group_exprs))
         
         # Construct the "HAVING" portion, if used.
         if len(self._state.having_conds) > 0:
@@ -209,19 +210,19 @@ class QueryBuilder(object):
                     "at least one grouping field."
                 )
             
+            for cond in self._state.having_conds:
+                params.add_params(cond._get_params())
             query_buffer.write("\nHAVING ")
             query_buffer.write(
                 "\n   AND ".join(
-                    cond._get_ref_field(self._db) for cond in self._state.having_conds))
-            for cond in self._state.having_conds:
-                params.extend(cond._get_params())
+                    cond._get_ref_field(params) for cond in self._state.having_conds))
         
         if len(self._state.orderings) > 0:
+            for order in self._state.orderings:
+                params.add_params(order._get_params())
             query_buffer.write("\nORDER BY ")
             query_buffer.write(", ".join(
-                order._get_order_spec(self._db) for order in self._state.orderings))
-            for order in self._state.orderings:
-                params.extend(order._get_params())
+                order._get_order_spec(params) for order in self._state.orderings))
         
         # Assign the resulting statement to the statement member.
         return (query_buffer.getvalue(), params)
@@ -256,16 +257,16 @@ class _QueryOrdering(object):
             raise QueryError("NULLS in an order by clause can only be \"FIRST\" or \"LAST\"")
         self._nulls = nulls
     
-    def _get_order_spec(self, db):
+    def _get_order_spec(self, param_store):
         if self._nulls is not None:
             return "{0} {1} NULLS {2}".format(
-                self._expr._get_ref_field(db),
+                self._expr._get_ref_field(param_store),
                 "ASC" if self._ascending else "DESC",
                 self._nulls
             )
         else:
             return "{0} {1}".format(
-                self._expr._get_ref_field(db),
+                self._expr._get_ref_field(param_store),
                 "ASC" if self._ascending else "DESC"
             )
     

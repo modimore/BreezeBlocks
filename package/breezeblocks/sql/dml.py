@@ -1,4 +1,6 @@
 from ..exceptions import InsertError, UpdateError, DeleteError
+from .expressions import Value
+from .param_store import get_param_store
 from .query import Query
 
 class Insert(object):
@@ -69,19 +71,21 @@ class Insert(object):
     
     def _insert_from_query(self, query, cur):
         statement = self._statement_base + "\n" + query._get_statement()
-        params = query._get_params()
         
-        cur.execute(statement, params)
+        params = get_param_store(self._db._dbapi.paramstyle)
+        params.add_params(query._get_params())
+        
+        cur.execute(statement, params.get_dbapi_params())
     
     def _insert_row_data(self, data, cur):
-        if self._db._dbapi.paramstyle == "qmark":
-            param_marker = "?"
-        elif self._db._dbapi.paramstyle in ["format", "pyformat"]:
-            param_marker = "%s"
-        else:
-            raise InsertError("DBAPI module has unsupported parameter style.")
+        if len(data) < 1:
+            return
         
-        statement = self._statement_base + " VALUES ({0})".format(",".join(param_marker for _ in self._columns))
+        params = get_param_store(self._db._dbapi.paramstyle)
+        values = [ Value(None) for _ in self._columns ]
+        params.add_params(values)
+        
+        statement = self._statement_base + " VALUES ({0})".format(",".join(v._get_ref_field(params) for v in values))
         
         cur.executemany(statement, data)
 
@@ -113,7 +117,7 @@ class Update(object):
             conn = self._db.pool.get()
         cur = conn.cursor()
         
-        cur.execute(self._statement, self._params)
+        cur.execute(self._statement, self._params.get_dbapi_params())
         
         cur.close()
         if manage_conn:
@@ -152,7 +156,7 @@ class Delete(object):
             conn = self._db.pool.get()
         cur = conn.cursor()
         
-        cur.execute(self._statement, self._params)
+        cur.execute(self._statement, self._params.get_dbapi_params())
         
         cur.close()
         if manage_conn:

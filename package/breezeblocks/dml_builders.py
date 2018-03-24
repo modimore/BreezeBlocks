@@ -4,6 +4,7 @@ from .exceptions import InsertError, UpdateError, DeleteError
 from .sql import Value
 from .sql.dml import Insert, Update, Delete
 from .sql.expressions import _fix_expression
+from .sql.param_store import get_param_store
 
 class InsertBuilder(object):
     def __init__(self, table, columns=[], db=None):
@@ -94,25 +95,25 @@ class UpdateBuilder(object):
     
     def _construct_sql(self):
         statement_buffer = StringIO()
-        params = []
+        params = get_param_store(self._db._dbapi.paramstyle)
         
         statement_buffer.write("UPDATE {} SET\n\t".format(self._table.name))
         
+        for update in self._updates:
+            params.add_params(update[0]._get_params())
+            params.add_params(update[1]._get_params())
         statement_buffer.write(",\n\t".join(
-            "{0} = {1}".format(u[0].name, u[1]._get_ref_field(self._db))
+            "{0} = {1}".format(u[0].name, u[1]._get_ref_field(params))
             for u in self._updates
         ))
-        for update in self._updates:
-            params.extend(update[0]._get_params())
-            params.extend(update[1]._get_params())
         
         if len(self._conditions) > 0:
             statement_buffer.write("\nWHERE ")
             
-            statement_buffer.write("\n  AND ".join(
-                cond._get_ref_field(self._db) for cond in self._conditions))
             for cond in self._conditions:
-                params.extend(cond._get_params())
+                params.add_params(cond._get_params())
+            statement_buffer.write("\n  AND ".join(
+                cond._get_ref_field(params) for cond in self._conditions))
         
         return (statement_buffer.getvalue(), params)
 
@@ -146,16 +147,16 @@ class DeleteBuilder(object):
     
     def _construct_sql(self):
         statement_buffer = StringIO()
-        params = []
+        params = get_param_store(self._db._dbapi.paramstyle)
         
         statement_buffer.write("DELETE FROM {}".format(self._table.name))
         
         if len(self._conditions) > 0:
             statement_buffer.write("\nWHERE ")
             
-            statement_buffer.write("\n  AND ".join(
-                cond._get_ref_field(self._db) for cond in self._conditions))
             for cond in self._conditions:
-                params.extend(cond._get_params())
+                params.add_params(cond._get_params())
+            statement_buffer.write("\n  AND ".join(
+                cond._get_ref_field(params) for cond in self._conditions))
         
         return (statement_buffer.getvalue(), params)

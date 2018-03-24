@@ -64,7 +64,7 @@ class Query(TableExpression):
             conn = self._db.pool.get()
         cur = conn.cursor()
         
-        cur.execute(statement, self._params)
+        cur.execute(statement, self._params.get_dbapi_params())
         results = cur.fetchall()
         
         cur.close()
@@ -94,7 +94,7 @@ class Query(TableExpression):
         return [ self._columns[name] for name in self._columns.getNames() ]
     
     def _get_params(self):
-        return self._params
+        return self._params.get_all_params()
     
     def _get_statement(self):
         return self._statement
@@ -131,10 +131,10 @@ class _QueryColumn(_ValueExpr):
     def _get_name(self):
         return self._column._get_name()
     
-    def _get_ref_field(self, db):
+    def _get_ref_field(self, param_store):
         return self._get_name()
     
-    def _get_select_field(self, db):
+    def _get_select_field(self, param_store):
         return self._get_name()
     
     def _get_tables(self):
