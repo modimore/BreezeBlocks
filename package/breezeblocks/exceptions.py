@@ -38,6 +38,15 @@ class UnsupportedModuleError(BreezeBlocksError):
     def __repr__(self):
         return "BreezeBlocks Error: DBAPI module not fully supported."
 
+class BuilderError(BreezeBlocksError):
+    """An error raised during statement building."""
+    
+    def __init__(self, message):
+        self._message = message
+    
+    def __repr__(self):
+        return "BreezeBlocks Builder Error: {}".format(self._message)
+
 class QueryError(BreezeBlocksError):
     """An error occuring during creation of a query."""
     
