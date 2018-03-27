@@ -184,7 +184,7 @@ class QueryBuilder(object):
         query_buffer.write("\nFROM\n\t")
         query_buffer.write(
             ",\n\t".join(
-                t._get_from_field() for t in self._state.from_relns))
+                t._get_from_field(params) for t in self._state.from_relns))
         
         # Construct the "WHERE" portion, if used.
         if len(self._state.where_conds) > 0:

@@ -11,7 +11,7 @@ In this way these classes also serve as a reference.
 class TableExpression(object):
     """Any object that can be used as a from field in a SQL query."""
     
-    def _get_from_field(self):
+    def _get_from_field(self, param_store):
         """Should return a string to represent the table in the from clause."""
         raise NotImplementedError()
     

@@ -87,7 +87,7 @@ class Query(TableExpression):
         """Constructs an object of the correct return type from a result row."""
         return self._return_type._make(r)
     
-    def _get_from_field(self):
+    def _get_from_field(self, param_store):
         return "({})".format(self._statement)
     
     def _get_selectables(self):

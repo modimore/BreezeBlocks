@@ -46,7 +46,7 @@ class Table(TableExpression):
     def getColumn(self, key):
         return self._columns[key]
     
-    def _get_from_field(self):
+    def _get_from_field(self, param_store):
         return self.name
     
     def _get_selectables(self):
@@ -96,14 +96,14 @@ class AliasedTableExpression(TableExpression):
     def getColumn(self, key):
         return self._columns[key]
     
-    def _get_from_field(self):
+    def _get_from_field(self, param_store):
         """Returns the appropriate from field for queries.
         
         This field includes both the table's original from field and the
         new alias.
         """
         return "{} AS {}".format(
-            self._table_expr._get_from_field(), self.name)
+            self._table_expr._get_from_field(param_store), self.name)
     
     def _get_selectables(self):
         return self._columns._get_selectables()

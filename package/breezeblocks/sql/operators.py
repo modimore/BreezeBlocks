@@ -78,7 +78,7 @@ class In_(_SubqueryOperator):
     
     def _get_ref_field(self, param_store):
         return "({}) IN ({})".format(
-            self._l_expr._get_ref_field(param_store), self._r_query._get_from_field())
+            self._l_expr._get_ref_field(param_store), self._r_query._get_from_field(param_store))
 
 class Between_(_Operator):
     """SQL `BETWEEN` operator.

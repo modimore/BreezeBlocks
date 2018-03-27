@@ -35,8 +35,8 @@ class _JoinedTable(ColumnCollection):
     def _get_tables(self):
         return {self._join_expr}
     
-    def _get_from_field(self):
-        return self._table._get_from_field()
+    def _get_from_field(self, param_store):
+        return self._table._get_from_field(param_store)
 
 class _Join(TableExpression):
     """Represents a join of two table expressions."""
@@ -109,13 +109,13 @@ class _QualifiedJoin(_Join):
         self._on_exprs = on
         self._using_fields = using
     
-    def _get_from_field(self):
-        return self._get_join_expression() + " " + self._get_join_condition()
+    def _get_from_field(self, param_store):
+        return self._get_join_expression(param_store) + " " + self._get_join_condition(param_store)
     
-    def _get_join_condition(self):
+    def _get_join_condition(self, param_store):
         if self._on_exprs is not None:
             return "ON {}".format(
-                ", ".join(expr._get_ref_field(db) for expr in self._on_exprs))
+                ", ".join(expr._get_ref_field(param_store) for expr in self._on_exprs))
         elif self._using_fields is not None:
             return "USING ({})".format(", ".join(self._using_fields))
         else:
@@ -125,37 +125,37 @@ class _QualifiedJoin(_Join):
 class CrossJoin(_Join):
     """Represents a cross join of two table expressions."""
     
-    def _get_from_field(self):
-        return self._get_join_expression()
+    def _get_from_field(self, param_store):
+        return self._get_join_expression(param_store)
     
-    def _get_join_expression(self):
+    def _get_join_expression(self, param_store):
         return "{} CROSS JOIN {}".format(
-            self._left._get_from_field(), self._right._get_from_field())
+            self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class InnerJoin(_QualifiedJoin):
     """Represents an inner join of two table expressions."""
     
-    def _get_join_expression(self):
+    def _get_join_expression(self, param_store):
         return "{} INNER JOIN {}".format(
-            self._left._get_from_field(), self._right._get_from_field())
+            self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class LeftJoin(_QualifiedJoin):
     """Represents a left outer join of two table expressions."""
     
-    def _get_join_expression(self):
+    def _get_join_expression(self, param_store):
         return "{} LEFT JOIN {}".format(
-            self._left._get_from_field(), self._right._get_from_field())
+            self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class RightJoin(_QualifiedJoin):
     """Represents a right outer join of two table expressions."""
     
-    def _get_join_expression(self):
+    def _get_join_expression(self, param_store):
         return "{} RIGHT JOIN {}".format(
-            self._left._get_from_field(), self._right._get_from_field())
+            self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class OuterJoin(_QualifiedJoin):
     """Represents a full outer join of two table expressions."""
     
-    def _get_join_expression(self):
+    def _get_join_expression(self, param_store):
         return "{} OUTER JOIN {}".format(
-            self._left._get_from_field(), self._right._get_from_field())
+            self._left._get_from_field(param_store), self._right._get_from_field(param_store))
