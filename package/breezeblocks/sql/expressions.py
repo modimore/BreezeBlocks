@@ -227,6 +227,7 @@ class _ChainableOperator(_Operator):
     def _get_tables(self):
         result = set()
         result.update(*[o._get_tables() for o in self._operands])
+        return result
 
 # Concrete operators start here.
 class Equal_(_BinaryOperator):
