@@ -124,6 +124,9 @@ class Update(object):
             conn.commit()
             conn.close()
     
+    def set_param(self, param_key, value):
+        return self._params.set_param_value(param_key, value)
+    
     def show(self):
         """Show the constructed SQL statement for this update."""
         print(self._statement, self._params, sep="\n")
@@ -162,6 +165,9 @@ class Delete(object):
         if manage_conn:
             conn.commit()
             conn.close()
+    
+    def set_param(self, param_key, value):
+        return self._params.set_param_value(param_key, value)
     
     def show(self):
         """Show the constructed SQL statement for this delete."""

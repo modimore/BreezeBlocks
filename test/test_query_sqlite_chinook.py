@@ -321,3 +321,28 @@ class SQLiteChinookTests(unittest.TestCase):
             self.assertTrue(hasattr(row, 'ArtistId'))
             self.assertTrue(hasattr(row, 'Name'))
             self.assertEqual(row.AlbumId, row.TrackAlbumId)
+    
+    def test_setQueryParamValue(self):
+        tbl_genre = self.tables["Genre"]
+        tbl_track = self.tables["Track"]
+        
+        genres = self.db.query(tbl_genre).get().execute(2)
+        
+        genre1_id = genres[0].GenreId
+        genre2_id = genres[1].GenreId
+        
+        genre_id_param = Value(genre1_id, param_name="genre_id")
+        
+        q = self.db.query(tbl_track.getColumn("GenreId"))\
+            .where(tbl_track.getColumn("GenreId") == genre_id_param)\
+            .get()
+        
+        # Assertion checks that the where condition has been applied to
+        # the results of the query.
+        for track in q.execute():
+            self.assertEqual(genre1_id, track.GenreId)
+        
+        q.set_param("genre_id", genre2_id)
+        
+        for track in q.execute():
+            self.assertEqual(genre2_id, track.GenreId)

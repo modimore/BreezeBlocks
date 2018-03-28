@@ -73,6 +73,9 @@ class Query(TableExpression):
         
         return [ self._process_result(r) for r in results ]
     
+    def set_param(self, param_key, value):
+        return self._params.set_param_value(param_key, value)
+    
     def show(self):
         """Show the constructed SQL statement for this query."""
         print(self._statement, self._params, sep="\n")

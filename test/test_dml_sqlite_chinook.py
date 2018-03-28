@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, Mock
 import sqlite3
 from breezeblocks import Database, Table
-from breezeblocks.sql.operators import Equal_, Like_
+from breezeblocks.sql.operators import Equal_, Like_, Or_
 from breezeblocks.sql import Value
 
 import os
@@ -119,3 +119,79 @@ class SQLiteChinookTests(unittest.TestCase):
         rows = q.execute(conn=conn)
         # All corresponding rows should have been deleted on this connection
         self.assertEqual(len(rows), 0)
+    
+    def test_setUpdateParamValue(self):
+        t_genre = self.tables['Genre']
+        t_album = self.tables['Album']
+        t_artist = self.tables['Artist']
+        t_track = self.tables['Track']
+        
+        artist_id = self.db.query(t_artist.columns['ArtistId'])\
+            .where(Equal_(t_artist.columns['Name'], 'The Clash'))\
+            .get().execute()[0].ArtistId
+        genres = self.db.query(t_genre.columns['GenreId'])\
+            .where(Or_(
+                t_genre.columns['Name'] == 'Rock',
+                t_genre.columns['Name'] == 'Alternative & Punk'
+            )).get().execute()
+        album_id = self.db.query(t_album.columns['AlbumId'])\
+            .where(Equal_(t_album.columns['ArtistId'], artist_id))\
+            .get().execute()[0].AlbumId
+        conn = self.db.pool.get()
+        
+        genre_id_param = Value(genres[0].GenreId, param_name="genre_id")
+        
+        # Are the Clash Rock or Alternative & Punk?
+        u = self.db.update(t_track)\
+            .set_(t_track.columns['GenreId'], genre_id_param)\
+            .where(Equal_(t_track.columns['AlbumId'], album_id)).get()
+        u.execute(conn=conn)
+        
+        q = self.db.query(t_track.columns['GenreId'])\
+            .where(Equal_(t_track.columns['AlbumId'], album_id)).get()
+        
+        for row in q.execute(conn=conn):
+            self.assertEqual(row.GenreId, genres[0].GenreId)
+        
+        u.set_param("genre_id", genres[1].GenreId)
+        u = self.db.update(t_track)\
+            .set_(t_track.columns['GenreId'], genre_id_param)\
+            .where(Equal_(t_track.columns['AlbumId'], album_id)).get()
+        u.execute(conn=conn)
+        
+        q = self.db.query(t_track.columns['GenreId'])\
+            .where(Equal_(t_track.columns['AlbumId'], album_id)).get()
+        
+        for row in q.execute(conn=conn):
+            self.assertEqual(row.GenreId, genres[1].GenreId)
+    
+    def test_setDeleteParamValue(self):
+        t_genre = self.tables['Genre']
+        t_track = self.tables['Track']
+        
+        conn = self.db.pool.get()
+        
+        # Deleting all my CLassical and Opera
+        
+        genres = self.db.query(t_genre.columns['GenreId'])\
+            .where(Or_(
+                t_genre.columns['Name'] == 'Classical',
+                t_genre.columns['Name'] == 'Opera'
+            )).get().execute()
+        
+        genre_delete_param = Value(genres[0].GenreId, param_name="genre_id")
+        
+        d = self.db.delete(t_track)\
+            .where(t_track.columns['GenreId'] == genre_delete_param).get()
+        d.execute(conn=conn)
+        
+        q = self.db.query(t_track.columns['TrackId'])\
+            .where(t_track.columns['GenreId'] == genres[0].GenreId).get()
+        self.assertEqual(len(q.execute(conn=conn)), 0)
+        
+        d.set_param("genre_id", genres[1].GenreId)
+        d.execute(conn=conn)
+        
+        q = self.db.query(t_track.columns['TrackId'])\
+            .where(t_track.columns['GenreId'] == genres[1].GenreId).get()
+        self.assertEqual(len(q.execute(conn=conn)), 0)
