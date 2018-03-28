@@ -299,3 +299,25 @@ class SQLiteChinookTests(unittest.TestCase):
             'The cross join should contain as many records as '\
             'the number of playlists times the number of tracks.'
         )
+    
+    def test_joinOn(self):
+        tbl_album = self.tables['Album']
+        tbl_track = self.tables['Track']
+        
+        tbl_joinAlbumTrack = InnerJoin(tbl_album, tbl_track,
+            on=[Equal_(tbl_album.getColumn('AlbumId'), tbl_track.getColumn('AlbumId'))]
+        )
+        
+        q = self.db.query(
+            tbl_joinAlbumTrack.left,
+            tbl_joinAlbumTrack.right.getColumn('AlbumId').as_('TrackAlbumId'),
+            tbl_joinAlbumTrack.right.getColumn('Name')).get()
+        
+        for row in q.execute():
+            self.assertEqual(5, len(row))
+            self.assertTrue(hasattr(row, 'AlbumId'))
+            self.assertTrue(hasattr(row, 'TrackAlbumId'))
+            self.assertTrue(hasattr(row, 'Title'))
+            self.assertTrue(hasattr(row, 'ArtistId'))
+            self.assertTrue(hasattr(row, 'Name'))
+            self.assertEqual(row.AlbumId, row.TrackAlbumId)
