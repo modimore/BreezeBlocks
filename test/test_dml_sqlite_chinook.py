@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import patch, Mock
 import sqlite3
 from breezeblocks import Database, Table
 from breezeblocks.sql.operators import Equal_, Like_, Or_
@@ -32,8 +31,6 @@ class SQLiteChinookTests(unittest.TestCase):
         i.execute([
             ('Weezer',)
         ], conn=conn)
-        
-        cur = conn.cursor()
         
         q = self.db.query(self.tables['Artist'].columns['Name'])\
             .where(Equal_(self.tables['Artist'].columns['Name'], 'Weezer'))\
@@ -139,6 +136,9 @@ class SQLiteChinookTests(unittest.TestCase):
             .get().execute()[0].AlbumId
         conn = self.db.pool.get()
         
+        q = self.db.query(t_track.columns['GenreId'])\
+            .where(Equal_(t_track.columns['AlbumId'], album_id)).get()
+        
         genre_id_param = Value(genres[0].GenreId, param_name="genre_id")
         
         # Are the Clash Rock or Alternative & Punk?
@@ -147,20 +147,11 @@ class SQLiteChinookTests(unittest.TestCase):
             .where(Equal_(t_track.columns['AlbumId'], album_id)).get()
         u.execute(conn=conn)
         
-        q = self.db.query(t_track.columns['GenreId'])\
-            .where(Equal_(t_track.columns['AlbumId'], album_id)).get()
-        
         for row in q.execute(conn=conn):
             self.assertEqual(row.GenreId, genres[0].GenreId)
         
         u.set_param("genre_id", genres[1].GenreId)
-        u = self.db.update(t_track)\
-            .set_(t_track.columns['GenreId'], genre_id_param)\
-            .where(Equal_(t_track.columns['AlbumId'], album_id)).get()
         u.execute(conn=conn)
-        
-        q = self.db.query(t_track.columns['GenreId'])\
-            .where(Equal_(t_track.columns['AlbumId'], album_id)).get()
         
         for row in q.execute(conn=conn):
             self.assertEqual(row.GenreId, genres[1].GenreId)
@@ -185,13 +176,13 @@ class SQLiteChinookTests(unittest.TestCase):
             .where(t_track.columns['GenreId'] == genre_delete_param).get()
         d.execute(conn=conn)
         
+        genre_query_param = Value(genres[0].GenreId, param_name="genre_id")
         q = self.db.query(t_track.columns['TrackId'])\
-            .where(t_track.columns['GenreId'] == genres[0].GenreId).get()
+            .where(t_track.columns['GenreId'] == genre_query_param).get()
         self.assertEqual(len(q.execute(conn=conn)), 0)
         
         d.set_param("genre_id", genres[1].GenreId)
         d.execute(conn=conn)
         
-        q = self.db.query(t_track.columns['TrackId'])\
-            .where(t_track.columns['GenreId'] == genres[1].GenreId).get()
+        q.set_param("genre_id", genres[1].GenreId)
         self.assertEqual(len(q.execute(conn=conn)), 0)
