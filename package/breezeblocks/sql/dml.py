@@ -87,7 +87,13 @@ class Insert(object):
         
         statement = self._statement_base + " VALUES ({0})".format(",".join(v._get_ref_field(params) for v in values))
         
-        cur.executemany(statement, data)
+        param_data = []
+        for row in data:
+            for param, value in zip(values, row):
+                param.set_value(value)
+            param_data.append(params.get_dbapi_params())
+        
+        cur.executemany(statement, param_data)
 
 class Update(object):
     """Represents a database update."""
