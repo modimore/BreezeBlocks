@@ -56,10 +56,10 @@ class ParamStore(object):
         raise NotImplementedError()
     
     def get_param_value(self, key):
-        return self._find_param(key)._value
+        return self._find_param(key).get_value()
     
     def set_param_value(self, key, value):
-        self._find_param(key)._value = value
+        self._find_param(key).set_value(value)
         return value
     
     def _find_param(self, key):
@@ -70,7 +70,7 @@ class ParamStore(object):
 
 class OrderedParamStore(ParamStore):
     def get_dbapi_params(self):
-        return [param._value for param in self._all_params]
+        return [param.get_value() for param in self._all_params]
 
 class NumberedParamStore(ParamStore):
     def __init__(self):
@@ -87,7 +87,7 @@ class NumberedParamStore(ParamStore):
             self._param_to_index[param_name] = len(self._ordered_params)
     
     def get_dbapi_params(self):
-        [param._value for param in self._ordered_params]
+        [param.get_value() for param in self._ordered_params]
 
 class MappedParamStore(ParamStore):
     def add_param(self, param):
@@ -97,7 +97,7 @@ class MappedParamStore(ParamStore):
         return param_name
     
     def get_dbapi_params(self):
-        return {key: param._value for key, param in self._params.items()}
+        return {key: param.get_value() for key, param in self._params.items()}
 
 class QmarkParamStore(OrderedParamStore):
     def get_param_marker(self, value):

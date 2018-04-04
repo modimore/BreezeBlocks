@@ -118,12 +118,30 @@ class _AliasedExpr(Selectable):
         return self._expr._get_tables()
 
 class Value(_ValueExpr):
-    """A constant value or literal for safe use in a query."""
+    """A constant value or literal for safe use in a query.
+    
+    This is meant to be used as a bound parameter for SQL statements
+    constructed through BreezeBlocks.
+    """
     
     def __init__(self, value=None, *, param_name=None):
         """Sets value equal to the provided value."""
         self._value = value
         self._param_name = param_name
+    
+    def get_value(self):
+        """Getter for the underlying value of this parameter.
+        
+        :return: The value of this parameter.
+        """
+        return self._value
+    
+    def set_value(self, value):
+        """Setter for the underlying value of this parameter.
+        
+        :param value: The value to assign to this parameter.
+        """
+        self._value = value
     
     def _get_name(self):
         """Constant expressions do not have names."""
