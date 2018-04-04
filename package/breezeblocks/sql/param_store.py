@@ -97,7 +97,7 @@ class MappedParamStore(ParamStore):
         return param_name
     
     def get_dbapi_params(self):
-        return {key: param._value for key, param in self._params}
+        return {key: param._value for key, param in self._params.items()}
 
 class QmarkParamStore(OrderedParamStore):
     def get_param_marker(self, value):
