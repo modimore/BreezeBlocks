@@ -1,7 +1,7 @@
 from breezeblocks import Table
 from breezeblocks.exceptions import QueryError
 from breezeblocks.sql.aggregates import Count_, RecordCount
-from breezeblocks.sql.join import InnerJoin, LeftJoin, CrossJoin
+from breezeblocks.sql.join import InnerJoin, FullJoin, LeftJoin, RightJoin, CrossJoin
 from breezeblocks.sql.operators import Equal_, In_
 from breezeblocks.sql import Value
 
@@ -15,7 +15,8 @@ class BaseQueryChinookTests(object):
         "Album": Table("Album", ["AlbumId", "Title", "ArtistId"]),
         "Track": Table("Track",
             ["TrackId", "Name", "AlbumId", "MediaTypeId", "GenreId", "Composer", "Milliseconds", "Bytes", "UnitPrice"]),
-        "Playlist": Table("Playlist", ["PlaylistId", "Name"])
+        "Playlist": Table("Playlist", ["PlaylistId", "Name"]),
+        "PlaylistTrack": Table("PlaylistTrack", ["PlaylistId", "TrackId"])
     }
     
     def test_tableQuery(self):
@@ -168,10 +169,30 @@ class BaseQueryChinookTests(object):
             prev_name = row.Name
     
     def test_orderByNullsFirst(self):
-        raise NotImplementedError()
+        tbl_track = self.tables["Track"]
+        
+        q = self.db.query(tbl_track.columns["Composer"])\
+            .order_by(tbl_track.columns["Composer"], nulls="first")\
+            .get()
+        
+        seen_value = False
+        for row in q.execute():
+            if not seen_value and row.Composer is not None:
+                seen_value = True
+            self.assertEqual(row.Composer is not None, seen_value)
     
     def test_orderByNullsLast(self):
-        raise NotImplementedError()
+        tbl_track = self.tables["Track"]
+        
+        q = self.db.query(tbl_track.columns["Composer"])\
+            .order_by(tbl_track.columns["Composer"], nulls="last")\
+            .get()
+        
+        seen_null = False
+        for row in q.execute():
+            if not seen_null and row.Composer is None:
+                seen_null = True
+            self.assertEqual(row.Composer is None, seen_null)
     
     def test_limit(self):
         limit_amount = 5
@@ -242,25 +263,65 @@ class BaseQueryChinookTests(object):
             self.assertTrue(hasattr(row, "Name"))
     
     def test_leftOuterJoin(self):
-        tbl_album = self.tables["Album"]
         tbl_track = self.tables["Track"]
+        tbl_playlist_track = self.tables["PlaylistTrack"]
         
-        tbl_leftJoinTrackAlbum = LeftJoin(tbl_track, tbl_album, using=["AlbumId"])
+        tbl_leftJoinTrackPlaylistTrack = LeftJoin(tbl_track, tbl_playlist_track, using=["TrackId"])
         
         q = self.db.query(
-            tbl_leftJoinTrackAlbum.left.getColumn("Name"),
-            tbl_leftJoinTrackAlbum.right.getColumn("Title").as_("AlbumTitle")
+            tbl_leftJoinTrackPlaylistTrack.left.getColumn("TrackId"),
+            tbl_leftJoinTrackPlaylistTrack.right.getColumn("PlaylistId")
         ).get()
         
-        for row in q.execute():
-            self.assertTrue(hasattr(row, "Name"))
-            self.assertTrue(hasattr(row, "AlbumTitle"))
+        num_tracks = len(self.db.query(tbl_track.columns["TrackId"]).distinct().get().execute())
+        
+        rows = q.execute()
+        self.assertGreaterEqual(len(rows), num_tracks)
+        for row in rows:
+            self.assertTrue(hasattr(row, "TrackId"))
+            self.assertNotEqual(row.TrackId, None)
+            self.assertTrue(hasattr(row, "PlaylistId"))
     
     def test_rightOuterJoin(self):
-        raise NotImplementedError()
+        tbl_genre = self.tables["Genre"]
+        tbl_track = self.tables["Track"]
+        
+        tbl_rightJoinTrackGenre = RightJoin(tbl_track, tbl_genre, using=["GenreId"])
+        
+        q = self.db.query(
+            tbl_rightJoinTrackGenre.left.getColumn("TrackId"),
+            tbl_rightJoinTrackGenre.right.getColumn("GenreId")
+        ).get()
+        
+        num_genres = len(self.db.query(tbl_genre.columns["GenreId"]).distinct().get().execute())
+        
+        rows = q.execute()
+        self.assertGreaterEqual(len(rows), num_genres)
+        for row in rows:
+            self.assertTrue(hasattr(row, "TrackId"))
+            self.assertTrue(hasattr(row, "GenreId"))
+            self.assertNotEqual(row.GenreId, None)
     
     def test_fullOuterJoin(self):
-        raise NotImplementedError()
+        tbl_genre = self.tables["Genre"]
+        tbl_track = self.tables["Track"]
+        
+        tbl_rightJoinTrackGenre = FullJoin(tbl_track, tbl_genre, using=["GenreId"])
+        
+        q = self.db.query(
+            tbl_rightJoinTrackGenre.left.getColumn("TrackId"),
+            tbl_rightJoinTrackGenre.right.getColumn("GenreId")
+        ).get()
+        
+        num_tracks = len(self.db.query(tbl_track.columns["TrackId"]).distinct().get().execute())
+        num_genres = len(self.db.query(tbl_track.columns["GenreId"]).distinct().get().execute())
+        
+        rows = q.execute()
+        self.assertGreaterEqual(len(rows), num_tracks)
+        self.assertGreaterEqual(len(rows), num_genres)
+        for row in rows:
+            self.assertTrue(hasattr(row, "TrackId"))
+            self.assertTrue(hasattr(row, "GenreId"))
     
     def test_crossJoin(self):
         tbl_playlist = self.tables["Playlist"]

@@ -153,9 +153,9 @@ class RightJoin(_QualifiedJoin):
         return "{} RIGHT JOIN {}".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
-class OuterJoin(_QualifiedJoin):
+class FullJoin(_QualifiedJoin):
     """Represents a full outer join of two table expressions."""
     
     def _get_join_expression(self, param_store):
-        return "{} OUTER JOIN {}".format(
+        return "{} FULL JOIN {}".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))
