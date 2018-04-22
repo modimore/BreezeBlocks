@@ -69,5 +69,4 @@ class Database(object):
     
     def connect(self):
         """Returns a new connection to the database."""
-        return self._dbapi.connect(self._dsn,
-            *self._connection_args, **self._connection_kwargs)
+        return self.pool.get()

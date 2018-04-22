@@ -89,7 +89,7 @@ class CursorProxy(object):
     
     def __setattr__(self, n, v):
         if (n == '_cursor'):
-            object.__setattr__(self, '_cursor', v)
+            return object.__setattr__(self, '_cursor', v)
         else:
             return setattr(self._cursor, n, v)
     
