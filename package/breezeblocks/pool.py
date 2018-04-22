@@ -52,7 +52,7 @@ class PooledConnection(object):
         Also store a weak-reference to this cursor so it can be
         closed when the connection is "closed".
         """
-        cursor = self._conn.cursor()
+        cursor = CursorProxy(self._conn.cursor())
         self._cursor_refs.append(weakref.ref(cursor))
         return cursor
     
@@ -71,7 +71,33 @@ class PooledConnection(object):
         """Puts the connection back in the pool when this object is deleted."""
         # Make sure this "closes".
         self.close()
-        # There is no superclass destructor, but it would be called here.
+        # There is no superclass destructor but it would be called here.
+
+class CursorProxy(object):
+    """Simple proxy for a DBAPI cursor.
+    
+    Useful when a DBAPI cursor is a native object, so a weak reference
+    to it can be held. Also makes it such that the cursor can act as a
+    context manager if it could not already.
+    """
+    
+    def __init__(self, cursor):
+        self._cursor = cursor
+    
+    def __getattr__(self, n):
+        return getattr(self._cursor, n)
+    
+    def __setattr__(self, n, v):
+        if (n == '_cursor'):
+            object.__setattr__(self, '_cursor', v)
+        else:
+            return setattr(self._cursor, n, v)
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        self._cursor.close()
 
 class ConnectionPool(object):
     """A pool of DBAPI 2.0 connections."""
