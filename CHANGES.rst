@@ -1,5 +1,12 @@
 Version History
 ===============
+0.2.4
+-----
+Adds a parameter store which has allowed for some new ways to build queries.
+There are now two ways to change the value of a parameter to a statement,
+and nested queries within other statements can work for the named, pyformat,
+and numeric parameter types. Some bug fixes accompany these changes.
+
 0.2.3
 -----
 When building a SQL statement, users no longer have to explicitly construct an
