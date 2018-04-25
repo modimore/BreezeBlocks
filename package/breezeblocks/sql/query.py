@@ -78,7 +78,7 @@ class Query(TableExpression):
     
     def show(self):
         """Show the constructed SQL statement for this query."""
-        print(self._statement, self._params, sep="\n")
+        print(self._statement, self._params.get_dbapi_params(), sep="\n")
     
     def getColumn(self, key):
         return self._columns[key]

@@ -21,3 +21,15 @@ class MariaDBODBCTests(BaseQueryChinookTests, unittest.TestCase):
     @unittest.skip("MariaDB seems to sort string case-insensitively. Python does not.")
     def test_orderByDesc(self):
         pass
+    
+    @unittest.skip("NULLS { FIRST | LAST } syntax not supported by MariaDB currently.")
+    def test_orderByNullsFirst(self):
+        pass
+    
+    @unittest.skip("NULLS { FIRST | LAST } syntax not supported by MariaDB currently.")
+    def test_orderByNullsLast(self):
+        pass
+    
+    @unittest.skip("Full Outer Join not supported by SQLite currently.")
+    def test_fullOuterJoin(self):
+        pass

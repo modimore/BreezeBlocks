@@ -64,7 +64,11 @@ class BaseQueryChinookTests(object):
             .where(tbl_genre.getColumn("Name") == "Alternative & Punk")\
             .get().execute()[0].GenreId
         
-        q = self.db.query(tbl_album.getColumn("Title"))\
+        
+        track_query = self.db.query(tbl_track.getColumn("AlbumId"))\
+            .where(tbl_track.getColumn("GenreId") == genre_id).get()
+        
+        album_query = self.db.query(tbl_album.getColumn("AlbumId"))\
                 .where(
                     In_(
                         tbl_album.getColumn("AlbumId"),
@@ -73,10 +77,12 @@ class BaseQueryChinookTests(object):
                     )
                 ).get()
         
-        # No assertion here because subqueries because subqueries in the select
-        # clause have not been implemented.
-        # However, the query running without error is important to test.
-        q.execute()
+        albums = album_query.execute()
+        tracks = track_query.execute()
+        album_ids = set(row.AlbumId for row in tracks)
+        self.assertEqual(len(albums), len(album_ids))
+        for row in albums:
+            self.assertTrue(row.AlbumId in album_ids)
     
     def test_aliasTable(self):
         tbl_album = self.tables["Album"]

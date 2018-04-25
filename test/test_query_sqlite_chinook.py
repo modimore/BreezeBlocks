@@ -26,6 +26,6 @@ class SQLiteChinookQueryTests(BaseQueryChinookTests, unittest.TestCase):
     def test_rightOuterJoin(self):
         pass
     
-    @unittest.skip("Full Outer Join not supported by SQLite currently")
+    @unittest.skip("Full Outer Join not supported by SQLite currently.")
     def test_fullOuterJoin(self):
         pass
