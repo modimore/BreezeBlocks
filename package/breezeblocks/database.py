@@ -11,8 +11,8 @@ class Database(object):
         """Refer to your DBAPI module documentation for what the content
         of `connect_args` and `connect_kwargs` should be.
         
-        :param connect_args: *args for calls to `dbapi.connect`.
-        :param connect_kwargs: **kwargs for calls to `dbapi.connect`.
+        :param connect_args: `*args` for calls to `dbapi.connect`.
+        :param connect_kwargs: `**kwargs` for calls to `dbapi.connect`.
         :param dbapi_module: The DBAPI 2.0 module to use for this database.
         :param dsn: The DSN (connection string) for this database.
           This will be pre-pended to `connect_args` if present.

@@ -11,40 +11,40 @@ Subpackages
 Submodules
 ----------
 
-breezeblocks\.database module
------------------------------
+breezeblocks.database module
+----------------------------
 
 .. automodule:: breezeblocks.database
     :members:
     :undoc-members:
     :show-inheritance:
 
-breezeblocks\.dml\_builders module
-----------------------------------
+breezeblocks.dml\_builders module
+---------------------------------
 
 .. automodule:: breezeblocks.dml_builders
     :members:
     :undoc-members:
     :show-inheritance:
 
-breezeblocks\.exceptions module
--------------------------------
+breezeblocks.exceptions module
+------------------------------
 
 .. automodule:: breezeblocks.exceptions
     :members:
     :undoc-members:
     :show-inheritance:
 
-breezeblocks\.pool module
--------------------------
+breezeblocks.pool module
+------------------------
 
 .. automodule:: breezeblocks.pool
     :members:
     :undoc-members:
     :show-inheritance:
 
-breezeblocks\.query\_builder module
------------------------------------
+breezeblocks.query\_builder module
+----------------------------------
 
 .. automodule:: breezeblocks.query_builder
     :members:

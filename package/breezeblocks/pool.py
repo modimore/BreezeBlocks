@@ -108,8 +108,8 @@ class ConnectionPool(object):
         :param dbapi_module: The DBAPI module to connect through.
         :param pool_size: Number of standby connections in the pool.
         :param conn_limit: Maximum number of open connections from the pool.
-        :param connect_args: *args for calls to `dbapi.connect`.
-        :param connect_kwargs: **kwargs for calls to `dbapi.connect`.
+        :param connect_args: `*args` for calls to `dbapi.connect`.
+        :param connect_kwargs: `**kwargs` for calls to `dbapi.connect`.
         """
         self._pool_size = pool_size
         self._conn_limit = conn_limit

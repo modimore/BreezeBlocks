@@ -3,6 +3,7 @@
 
 import os, sys
 sys.path.insert(0, os.path.abspath('../../package'))
+import breezeblocks
 
 # -- General configuration ------------------------------------------------
 
@@ -23,9 +24,9 @@ copyright = '2017, Quinn Mortimer'
 author = 'Quinn Mortimer'
 
 # The short X.Y version.
-version = '0.2.1'
+version = breezeblocks.version
 # The full version, including alpha/beta/rc tags.
-release = '0.2.1'
+release = breezeblocks.version
 
 language = None
 

@@ -1,11 +1,18 @@
+import os, sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'package'))
+from breezeblocks import version as bb_version
+sys.path.pop(0)
+
 from setuptools import setup
 from setuptools import find_packages
+
+from package.breezeblocks import version as bb_version
 
 with open('README.rst', 'r') as f:
     long_description=f.read()
 
 setup(name='breezeblocks',
-    version='0.2.5.dev0',
+    version=bb_version,
     description='A lightweight SQL Querying package.',
     author='Quinn Mortimer',
     author_email='quinn.e.mortimer@gmail.com',
@@ -22,5 +29,5 @@ setup(name='breezeblocks',
         "Programming Language :: Python :: 3",
         "Topic :: Database :: Front-Ends",
         "Operating System :: OS Independent"
-    ],
+    ]
 )
