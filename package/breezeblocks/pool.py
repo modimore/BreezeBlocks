@@ -14,7 +14,6 @@ class PooledConnection(object):
         """Bundles a connection with a specific pool.
         
         :param pool: The source connection pool.
-        
         :param conn: The underlying connection.
         """
         self._pool = pool
@@ -102,12 +101,14 @@ class CursorProxy(object):
 class ConnectionPool(object):
     """A pool of DBAPI 2.0 connections."""
     
-    def __init__(self, dbapi_module, pool_size, conn_limit,
+    def __init__(self, dbapi_module, pool_size, conn_limit, on_connect,
             *connect_args, **connect_kwargs):
         """
         :param dbapi_module: The DBAPI module to connect through.
         :param pool_size: Number of standby connections in the pool.
         :param conn_limit: Maximum number of open connections from the pool.
+        :param on_connect: A SQL script to execute for each connection.
+            It is executed for a connection each time it is taken out.
         :param connect_args: `*args` for calls to `dbapi.connect`.
         :param connect_kwargs: `**kwargs` for calls to `dbapi.connect`.
         """
@@ -120,6 +121,7 @@ class ConnectionPool(object):
         self._connect = self._dbapi.connect
         self._connect_args = connect_args
         self._connect_kwargs = connect_kwargs
+        self._on_connect = on_connect
         
         self._pool = queue.Queue(self._pool_size)
     
@@ -144,7 +146,12 @@ class ConnectionPool(object):
         """Returns a wrapped connection object from the pool.
         
         As `ConnectionPool._getconn`, may raise `queue.Empty`."""
-        return PooledConnection(self, self._getconn(block, timeout))
+        conn = PooledConnection(self, self._getconn(block, timeout))
+        if self._on_connect is not None:
+            cur = conn.cursor()
+            cur.execute(self._on_connect)
+            cur.close()
+        return conn
     
     def _putconn(self, conn, block=True, timeout=None):
         """Returns a connection to the connection pool.
