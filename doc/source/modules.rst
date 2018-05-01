@@ -1,5 +1,5 @@
-package
-=======
+breezeblocks
+============
 
 .. toctree::
    :maxdepth: 4

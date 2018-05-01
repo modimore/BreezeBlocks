@@ -32,6 +32,7 @@ scope of the project. Creating tables, views, and triggers is not.
 .. toctree::
    :maxdepth: 1
    
+   quickstart
    modules
 
 Indices and tables
