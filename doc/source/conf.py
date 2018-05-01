@@ -24,9 +24,9 @@ copyright = '2017, Quinn Mortimer'
 author = 'Quinn Mortimer'
 
 # The short X.Y version.
-version = breezeblocks.version
+version = breezeblocks.__version__
 # The full version, including alpha/beta/rc tags.
-release = breezeblocks.version
+release = breezeblocks.__version__
 
 language = None
 

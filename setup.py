@@ -1,6 +1,6 @@
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'package'))
-from breezeblocks import version as bb_version
+from breezeblocks import __version__ as bb_version
 sys.path.pop(0)
 
 from setuptools import setup
