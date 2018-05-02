@@ -6,8 +6,6 @@ sys.path.pop(0)
 from setuptools import setup
 from setuptools import find_packages
 
-from package.breezeblocks import version as bb_version
-
 with open('README.rst', 'r') as f:
     long_description=f.read()
 
