@@ -1,5 +1,12 @@
 Version History
 ===============
+0.3.0
+-----
+Makes the module usable with DBAPI modules with native cursors by proxying
+cursors coming from the connection pool. Adds the option to run some SQL
+each time a connection is taken from the pool. Also fixes some long-standing
+but recently discovered bugs.
+
 0.2.4
 -----
 Adds a parameter store which has allowed for some new ways to build queries.
