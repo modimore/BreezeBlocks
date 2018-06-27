@@ -37,6 +37,12 @@ class _JoinedTable(ColumnCollection):
     
     def _get_from_field(self, param_store):
         return self._table._get_from_field(param_store)
+    
+    def _get_joined_tables(self):
+        if isinstance(self._table, _Join):
+            return self._table._get_all_tables()
+        else:
+            return [self._table]
 
 class _Join(TableExpression):
     """Represents a join of two table expressions."""
@@ -45,7 +51,11 @@ class _Join(TableExpression):
         """Creates a join for the left and right expressions."""
         self._left = _JoinedTable(self, left)
         self._right = _JoinedTable(self, right)
-        self._name = "jn_" + left.get_name() + "_" + right.get_name()
+        all_tables = self._get_all_tables()
+        self._tables = {table.get_name(): _JoinedTable(self, table)
+            for table in all_tables}
+        self._name = "jn_" + "_".join(
+            table.get_name() for table in all_tables)
     
     @property
     def left(self):
@@ -54,6 +64,10 @@ class _Join(TableExpression):
     @property
     def right(self):
         return self._right
+    
+    @property
+    def tables(self):
+        return self._tables
     
     def getColumn(self, key):
         if not isinstance(key, str):
@@ -80,6 +94,12 @@ class _Join(TableExpression):
             )
         else:
             return False
+    
+    def _get_all_tables(self):
+        all_tables = []
+        all_tables.extend(self._left._get_joined_tables())
+        all_tables.extend(self._right._get_joined_tables())
+        return all_tables
     
     def _get_selectables(self):
         selectables = []
@@ -133,33 +153,33 @@ class CrossJoin(_Join):
         return self._get_join_expression(param_store)
     
     def _get_join_expression(self, param_store):
-        return "{} CROSS JOIN {}".format(
+        return "({}) CROSS JOIN ({})".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class InnerJoin(_QualifiedJoin):
     """Represents an inner join of two table expressions."""
     
     def _get_join_expression(self, param_store):
-        return "{} INNER JOIN {}".format(
+        return "({}) INNER JOIN ({})".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class LeftJoin(_QualifiedJoin):
     """Represents a left outer join of two table expressions."""
     
     def _get_join_expression(self, param_store):
-        return "{} LEFT JOIN {}".format(
+        return "({}) LEFT JOIN ({})".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class RightJoin(_QualifiedJoin):
     """Represents a right outer join of two table expressions."""
     
     def _get_join_expression(self, param_store):
-        return "{} RIGHT JOIN {}".format(
+        return "({}) RIGHT JOIN ({})".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class FullJoin(_QualifiedJoin):
     """Represents a full outer join of two table expressions."""
     
     def _get_join_expression(self, param_store):
-        return "{} FULL JOIN {}".format(
+        return "({}) FULL JOIN ({})".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))

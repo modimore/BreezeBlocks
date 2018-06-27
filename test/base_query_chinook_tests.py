@@ -377,6 +377,28 @@ class BaseQueryChinookTests(object):
             self.assertTrue(hasattr(row, "Name"))
             self.assertEqual(row.AlbumId, row.TrackAlbumId)
     
+    def test_multipleJoins(self):
+        tbl_album = self.tables["Album"]
+        tbl_artist = self.tables["Artist"]
+        tbl_track = self.tables["Track"]
+        
+        tbl_joinAlbumTrack = InnerJoin(tbl_album, tbl_track, using=["AlbumId"])
+        tbl_joinArtistAlbumTrack = InnerJoin(tbl_artist, tbl_joinAlbumTrack, using=["ArtistId"])
+        
+        q = self.db.query(
+            tbl_joinArtistAlbumTrack.tables["Artist"].getColumn("ArtistId"),
+            tbl_joinArtistAlbumTrack.tables["Album"].getColumn("ArtistId").as_("AlbumArtistId"),
+            tbl_joinArtistAlbumTrack.tables["Album"].getColumn("AlbumId"),
+            tbl_joinArtistAlbumTrack.tables["Track"].getColumn("Name").as_("TrackName")
+        ).get()
+        
+        for row in q.execute():
+            self.assertTrue(hasattr(row, "ArtistId"))
+            self.assertTrue(hasattr(row, "AlbumArtistId"))
+            self.assertTrue(hasattr(row, "AlbumArtistId"))
+            self.assertTrue(hasattr(row, "TrackName"))
+            self.assertEqual(row.ArtistId, row.AlbumArtistId)
+    
     def test_setQueryParamValue(self):
         tbl_genre = self.tables["Genre"]
         tbl_track = self.tables["Track"]
