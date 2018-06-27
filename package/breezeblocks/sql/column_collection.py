@@ -33,6 +33,9 @@ class ColumnCollection(object):
         else:
             raise TypeError("Column Collections require strings for column names.")
     
+    def __contains__(self, key):
+        return key in self._columns
+    
     def __getitem__(self, key):
         return self._get_column(key)
     

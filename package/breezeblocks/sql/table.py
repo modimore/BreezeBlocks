@@ -8,10 +8,11 @@ class Table(TableExpression):
     def __init__(self, table_name, column_names, schema=None):
         """Initializes a table."""
         # Construct table's qualified name
+        self.name = table_name
         if schema is not None:
-            self.name = ".".join([schema, table_name])
+            self.qualified_name = ".".join([schema, table_name])
         else:
-            self.name = table_name
+            self.qualified_name = table_name
         
         self._columns = _TableColumnCollection(self, column_names)
     
@@ -45,6 +46,9 @@ class Table(TableExpression):
     
     def getColumn(self, key):
         return self._columns[key]
+    
+    def get_name(self):
+        return self.name
     
     def _get_from_field(self, param_store):
         return self.name
@@ -95,6 +99,9 @@ class AliasedTableExpression(TableExpression):
     
     def getColumn(self, key):
         return self._columns[key]
+    
+    def get_name(self):
+        return self.name
     
     def _get_from_field(self, param_store):
         """Returns the appropriate from field for queries.

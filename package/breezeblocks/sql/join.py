@@ -45,6 +45,7 @@ class _Join(TableExpression):
         """Creates a join for the left and right expressions."""
         self._left = _JoinedTable(self, left)
         self._right = _JoinedTable(self, right)
+        self._name = "jn_" + left.get_name() + "_" + right.get_name()
     
     @property
     def left(self):
@@ -64,6 +65,9 @@ class _Join(TableExpression):
             return self._right[key]
         else:
             raise KeyError()
+    
+    def get_name(self):
+        return self._name
     
     def __hash__(self):
         return hash((self._left._table, self._right._table))

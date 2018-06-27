@@ -33,7 +33,8 @@ class Query(TableExpression):
         self._params = params
         
         self._columns = _QueryColumnCollection(self)
-        self._return_type = namedtuple("QueryResult_"+str(id(self)),
+        self._name = "Query_"+str(id(self))
+        self._return_type = namedtuple(self._name,
             self._columns.getNames(), rename=True)
     
     @property
@@ -82,6 +83,9 @@ class Query(TableExpression):
     
     def getColumn(self, key):
         return self._columns[key]
+    
+    def get_name(self):
+        return self._name
     
     def as_(self, alias):
         return AliasedQuery(self, alias)
