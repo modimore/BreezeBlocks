@@ -145,6 +145,19 @@ class QueryBuilder(object):
         self._state.distinct = True
         return self
     
+    def clone(self, db=None):
+        """Get a query builder object with the same state as this one.
+        
+        Effectively clones the state and adds all 
+        """
+        if db is None:
+            db = self._db
+        
+        cloned_builder = QueryBuilder(db)
+        cloned_builder._state = self._state.clone()
+        
+        return cloned_builder
+    
     def get(self):
         """Get a query object for the current state of the builder.
         

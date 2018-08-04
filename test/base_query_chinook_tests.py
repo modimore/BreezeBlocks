@@ -423,3 +423,25 @@ class BaseQueryChinookTests(object):
         
         for track in q.execute():
             self.assertEqual(genre2_id, track.GenreId)
+    
+    def test_queryBuilderClone(self):
+        tbl_track = self.tables["Track"]
+        
+        qbd_track = self.db.query(
+            tbl_track.columns["Name"], tbl_track.columns["GenreId"])
+        
+        qbd_track_clone = qbd_track.clone()\
+            .select(tbl_track.columns["AlbumId"])\
+            .where(tbl_track.columns["GenreId"] == 2)
+        
+        qbd_track.where(tbl_track.columns["GenreId"] == 1)
+        
+        for row in qbd_track.get().execute():
+            self.assertTrue(hasattr(row, "Name"))
+            self.assertFalse(hasattr(row, "AlbumId"))
+            self.assertEqual(row.GenreId, 1)
+        
+        for row in qbd_track_clone.get().execute():
+            self.assertTrue(hasattr(row, "Name"))
+            self.assertTrue(hasattr(row, "AlbumId"))
+            self.assertEqual(row.GenreId, 2)
