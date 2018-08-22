@@ -148,7 +148,14 @@ class QueryBuilder(object):
     def clone(self, db=None):
         """Get a query builder object with the same state as this one.
         
-        Effectively clones the state and adds all 
+        This is achieved by cloning the state and assigning the clone as the
+        state of a new query builder. The new query builder is then returned.
+        If a query were constructed from both right after calling this, then
+        both queries would produce equivalent SQL.
+
+        :param db: The database the new querybuilder will be for.
+            If omitted or None it will use the same one as this builder.
+        :return: The clone of this query builder
         """
         if db is None:
             db = self._db
