@@ -1,5 +1,12 @@
 Version History
 ===============
+0.3.1
+-----
+Query Builders can be cloned now, allowing you to fork the state for similar
+queries if desired. Joined tables can be accessed by name, which is more
+convenient than traversing all the way down the left or right side of the
+join with multiple joins and feels less arbitrary.
+
 0.3.0
 -----
 Makes the module usable with DBAPI modules with native cursors by proxying
