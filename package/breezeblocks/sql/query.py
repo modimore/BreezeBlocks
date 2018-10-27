@@ -35,7 +35,7 @@ class Query(TableExpression):
         self._columns = _QueryColumnCollection(self)
         self._name = "Query_"+str(id(self))
         self._return_type = namedtuple(self._name,
-            self._columns.getNames(), rename=True)
+            self._columns.get_names(), rename=True)
     
     @property
     def columns(self):
@@ -81,7 +81,7 @@ class Query(TableExpression):
         """Show the constructed SQL statement for this query."""
         print(self._statement, self._params.get_dbapi_params(), sep="\n")
     
-    def getColumn(self, key):
+    def get_column(self, key):
         return self._get_column(key)
     
     def get_name(self):
@@ -95,13 +95,13 @@ class Query(TableExpression):
         return self._return_type._make(r)
     
     def _get_column(self, name):
-        return self._columns.getColumn(key)
+        return self._columns.get_column(key)
     
     def _get_from_field(self, param_store):
         return "({})".format(self._statement)
     
     def _get_selectables(self):
-        return [ self._columns[name] for name in self._columns.getNames() ]
+        return [ self._columns[name] for name in self._columns.get_names() ]
     
     def _get_params(self):
         return self._params.get_all_params()

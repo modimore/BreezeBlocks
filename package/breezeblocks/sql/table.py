@@ -58,7 +58,7 @@ class Table(TableExpression):
     def columns(self):
         return self._columns
     
-    def getColumn(self, key):
+    def get_column(self, key):
         return self._get_column(key)
     
     def get_name(self):
@@ -66,7 +66,7 @@ class Table(TableExpression):
     
     def _get_column(self, name):
         try:
-            return self._columns.getColumn(name)
+            return self._columns.get_column(name)
         except MissingColumnError as err:
             err.set_table(self)
             raise
@@ -127,13 +127,13 @@ class AliasedTableExpression(TableExpression):
             raise KeyError
     
     def _get_column(self, name):
-        return self._columns.getColumn(name)
+        return self._columns.get_column(name)
     
     @property
     def columns(self):
         return self._columns
     
-    def getColumn(self, key):
+    def get_column(self, key):
         return self._columns[key]
     
     def get_name(self):

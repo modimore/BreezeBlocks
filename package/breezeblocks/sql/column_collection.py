@@ -47,8 +47,8 @@ class ColumnCollection(object):
         except MissingColumnError:
             raise KeyError
     
-    def getColumn(self, key):
+    def get_column(self, key):
         return self._get_column(key)
     
-    def getNames(self):
+    def get_names(self):
         return self._column_names

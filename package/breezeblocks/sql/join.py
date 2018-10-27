@@ -69,7 +69,7 @@ class _Join(TableExpression):
     def tables(self):
         return self._tables
     
-    def getColumn(self, key):
+    def get_column(self, key):
         return self._get_column(key)
     
     def get_name(self):
@@ -125,9 +125,9 @@ class _Join(TableExpression):
             raise TypeError("Tables require strings for lookup keys.")
         
         if key in self._left._columns:
-            return self._left.getColumn(key)
+            return self._left.get_column(key)
         elif key in self._right._columns:
-            return self._right.getColumn(key)
+            return self._right.get_column(key)
         else:
             raise MissingColumnError(key, self)
 
