@@ -76,3 +76,19 @@ class DeleteError(BreezeBlocksError):
     
     def __repr__(self):
         return "BreezeBlocks Delete Error: {}".format(self._message)
+
+class MissingColumnError(BreezeBlocksError):
+    def __init__(self, column_name, table=None):
+        self._column_name = column_name
+        self._table = table
+    
+    def __repr__(self):
+        if self._table_expr is not None:
+            return "BreezeBlocks Error: missing column {} in table {}".format(
+                self._column_name, self._table.get_name())
+        else:
+            return "BreezeBlocks Error: could not find column {}".format(
+                self._column_name)
+    
+    def set_table(table):
+        self._table = table

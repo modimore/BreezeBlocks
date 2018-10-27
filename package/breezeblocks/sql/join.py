@@ -70,15 +70,7 @@ class _Join(TableExpression):
         return self._tables
     
     def getColumn(self, key):
-        if not isinstance(key, str):
-            raise TypeError("Tables require strings for lookup keys.")
-        
-        if key in self._left._columns:
-            return self._left[key]
-        elif key in self._right._columns:
-            return self._right[key]
-        else:
-            raise KeyError()
+        return self._get_column(key)
     
     def get_name(self):
         return self._name
@@ -94,6 +86,18 @@ class _Join(TableExpression):
             )
         else:
             return False
+    
+    def __getattr__(self, name):
+        try:
+            return self._get_column(name)
+        except MissingColumnError:
+            raise AttributeError
+    
+    def __getitem__(self, key):
+        try:
+            return self._get_column(key)
+        except MissingColumnExceptio:
+            raise KeyError
     
     def _get_all_tables(self):
         all_tables = []
@@ -115,6 +119,17 @@ class _Join(TableExpression):
     
     def _get_join_expression(self):
         raise NotImplementedError()
+    
+    def _get_column(self, key):
+        if not isinstance(key, str):
+            raise TypeError("Tables require strings for lookup keys.")
+        
+        if key in self._left._columns:
+            return self._left.getColumn(key)
+        elif key in self._right._columns:
+            return self._right.getColumn(key)
+        else:
+            raise MissingColumnError(key, self)
 
 class _QualifiedJoin(_Join):
     """Represents a join with a "USING" or "ON" condition."""

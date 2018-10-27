@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from ..exceptions import QueryError
+from ..exceptions import QueryError, MissingColumnError
 
 from .column import AliasedColumnExpr
 from .column_collection import ColumnCollection
@@ -82,7 +82,7 @@ class Query(TableExpression):
         print(self._statement, self._params.get_dbapi_params(), sep="\n")
     
     def getColumn(self, key):
-        return self._columns[key]
+        return self._get_column(key)
     
     def get_name(self):
         return self._name
@@ -93,6 +93,9 @@ class Query(TableExpression):
     def _process_result(self, r):
         """Constructs an object of the correct return type from a result row."""
         return self._return_type._make(r)
+    
+    def _get_column(self, name):
+        return self._columns.getColumn(key)
     
     def _get_from_field(self, param_store):
         return "({})".format(self._statement)
@@ -105,6 +108,18 @@ class Query(TableExpression):
     
     def _get_statement(self):
         return self._statement
+    
+    def __getattr__(self, name):
+        try:
+            return self._get_column(name)
+        except MissingColumnError:
+            raise AttributeError
+    
+    def __getitem__(self, key):
+        try:
+            return self._get_column(name)
+        except MissingColumnError:
+            raise KeyError
 
 class AliasedQuery(AliasedTableExpression):
     """A finalized query that has been given an alias.

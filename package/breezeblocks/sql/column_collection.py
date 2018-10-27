@@ -6,6 +6,8 @@ other scenario where the columns referenced are not part of a collection
 implied by another class.
 """
 
+from ..exceptions import MissingColumnError
+
 class ColumnCollection(object):
     """Represents a collection of columns in a database.
     
@@ -28,16 +30,22 @@ class ColumnCollection(object):
         return tables
     
     def _get_column(self, key):
-        if isinstance(key, str):
-            return self._columns[key]
-        else:
+        if not isinstance(key, str):
             raise TypeError("Column Collections require strings for column names.")
+        
+        try:
+            return self._columns[key]
+        except KeyError:
+            raise MissingColumnError(key)
     
     def __contains__(self, key):
         return key in self._columns
     
     def __getitem__(self, key):
-        return self._get_column(key)
+        try:
+            return self._get_column(key)
+        except MissingColumnError:
+            raise KeyError
     
     def getColumn(self, key):
         return self._get_column(key)

@@ -1,3 +1,5 @@
+from ..exceptions import MissingColumnError
+
 from .query_components import TableExpression
 from .column import ColumnExpr
 from .column_collection import ColumnCollection
@@ -40,15 +42,34 @@ class Table(TableExpression):
         else:
             return False
     
+    def __getattr__(self, name):
+        try:
+            return self._get_column(name)
+        except MissingColumnError:
+            raise AttributeError
+    
+    def __getitem__(self, key):
+        try:
+            return self._get_column(key)
+        except MissingColumnError:
+            raise KeyError
+    
     @property
     def columns(self):
         return self._columns
     
     def getColumn(self, key):
-        return self._columns[key]
+        return self._get_column(key)
     
     def get_name(self):
         return self.name
+    
+    def _get_column(self, name):
+        try:
+            return self._columns.getColumn(name)
+        except MissingColumnError as err:
+            err.set_table(self)
+            raise
     
     def _get_from_field(self, param_store):
         return self.name
@@ -92,6 +113,21 @@ class AliasedTableExpression(TableExpression):
             return self.name == other.name and self._table_expr == other._table_expr
         else:
             return False
+    
+    def __getattr__(self, name):
+        try:
+            return self._get_column(name)
+        except MissingColumnError:
+            raise AttributeError
+    
+    def __getitem__(self, key):
+        try:
+            return self._get_column(key)
+        except MissingColumnExceptio:
+            raise KeyError
+    
+    def _get_column(self, name):
+        return self._columns.getColumn(name)
     
     @property
     def columns(self):
