@@ -31,7 +31,7 @@ class BaseQueryChinookTests(object):
     
     def test_columnQuery(self):
         """Tests a simple select on a column."""
-        q = self.db.query(self.tables["Artist"].getColumn("Name")).get()
+        q = self.db.query(self.tables["Artist"].columns["Name"]).get()
         
         # Assertion checks that only the queried columns are returned.
         for row in q.execute():
@@ -43,11 +43,11 @@ class BaseQueryChinookTests(object):
         tbl_genre = self.tables["Genre"]
         tbl_track = self.tables["Track"]
         genre_id = self.db.query(tbl_genre)\
-            .where(tbl_genre.getColumn("Name") == "Alternative & Punk")\
+            .where(tbl_genre.columns["Name"] == "Alternative & Punk")\
             .get().execute()[0].GenreId
         
-        q = self.db.query(tbl_track.getColumn("GenreId"))\
-            .where(tbl_track.getColumn("GenreId") == genre_id)\
+        q = self.db.query(tbl_track.columns["GenreId"])\
+            .where(tbl_track.columns["GenreId"] == genre_id)\
             .get()
         
         # Assertion checks that the where condition has been applied to
@@ -61,19 +61,19 @@ class BaseQueryChinookTests(object):
         tbl_track = self.tables["Track"]
         
         genre_id = self.db.query(tbl_genre)\
-            .where(tbl_genre.getColumn("Name") == "Alternative & Punk")\
+            .where(tbl_genre.columns["Name"] == "Alternative & Punk")\
             .get().execute()[0].GenreId
         
         
-        track_query = self.db.query(tbl_track.getColumn("AlbumId"))\
-            .where(tbl_track.getColumn("GenreId") == genre_id).get()
+        track_query = self.db.query(tbl_track.columns["AlbumId"])\
+            .where(tbl_track.columns["GenreId"] == genre_id).get()
         
-        album_query = self.db.query(tbl_album.getColumn("AlbumId"))\
+        album_query = self.db.query(tbl_album.columns["AlbumId"])\
                 .where(
                     In_(
-                        tbl_album.getColumn("AlbumId"),
-                        self.db.query(tbl_track.getColumn("AlbumId"))\
-                            .where(tbl_track.getColumn("GenreId") == genre_id).get()
+                        tbl_album.columns["AlbumId"],
+                        self.db.query(tbl_track.columns["AlbumId"])\
+                            .where(tbl_track.columns["GenreId"] == genre_id).get()
                     )
                 ).get()
         
@@ -88,12 +88,12 @@ class BaseQueryChinookTests(object):
         tbl_album = self.tables["Album"]
         tbl_artist = self.tables["Artist"]
         
-        artist_id = self.db.query(tbl_artist.getColumn("ArtistId"))\
-            .where(Equal_(tbl_artist.getColumn("Name"), "Queen"))\
+        artist_id = self.db.query(tbl_artist.columns["ArtistId"])\
+            .where(Equal_(tbl_artist.columns["Name"], "Queen"))\
             .get().execute()[0].ArtistId
         
         musician = tbl_artist.as_("Musician")
-        q = self.db.query(musician).where(Equal_(musician.getColumn("ArtistId"), Value(artist_id))).get()
+        q = self.db.query(musician).where(Equal_(musician.columns["ArtistId"], Value(artist_id))).get()
         
         for row in q.execute():
             self.assertTrue(hasattr(row, "ArtistId"))
@@ -104,12 +104,12 @@ class BaseQueryChinookTests(object):
         tbl_album = self.tables["Album"]
         tbl_artist = self.tables["Artist"]
         
-        artist_id = self.db.query(tbl_artist.getColumn("ArtistId"))\
-            .where(Equal_(tbl_artist.getColumn("Name"), "Queen"))\
+        artist_id = self.db.query(tbl_artist.columns["ArtistId"])\
+            .where(Equal_(tbl_artist.columns["Name"], "Queen"))\
             .get().execute()[0].ArtistId
         
-        inner_q = self.db.query(tbl_album.getColumn("ArtistId"), tbl_album.getColumn("Title"))\
-            .where(Equal_(tbl_album.getColumn("ArtistId"), Value(artist_id))).get()
+        inner_q = self.db.query(tbl_album.columns["ArtistId"], tbl_album.columns["Title"])\
+            .where(Equal_(tbl_album.columns["ArtistId"], Value(artist_id))).get()
         
         q = self.db.query(inner_q.as_("q")).get()
         
@@ -121,8 +121,8 @@ class BaseQueryChinookTests(object):
     def test_groupBy(self):
         tbl_track = self.tables["Track"]
         
-        q = self.db.query(tbl_track.getColumn("GenreId"), Count_(tbl_track.getColumn("TrackId")).as_("TrackCount"))\
-            .group_by(tbl_track.getColumn("GenreId")).get()
+        q = self.db.query(tbl_track.columns["GenreId"], Count_(tbl_track.columns["TrackId"]).as_("TrackCount"))\
+            .group_by(tbl_track.columns["GenreId"]).get()
         
         for row in q.execute():
             self.assertTrue(hasattr(row, "GenreId"))
@@ -131,9 +131,9 @@ class BaseQueryChinookTests(object):
     def test_having(self):
         tbl_track = self.tables["Track"]
         
-        q = self.db.query(tbl_track.getColumn("GenreId"), Count_(tbl_track.getColumn("TrackId")).as_("TrackCount"))\
-            .group_by(tbl_track.getColumn("GenreId"))\
-            .having(Count_(tbl_track.getColumn("TrackId")) > 25).get()
+        q = self.db.query(tbl_track.columns["GenreId"], Count_(tbl_track.columns["TrackId"]).as_("TrackCount"))\
+            .group_by(tbl_track.columns["GenreId"])\
+            .having(Count_(tbl_track.columns["TrackId"]) > 25).get()
         
         for row in q.execute():
             self.assertTrue(hasattr(row, "GenreId"))
@@ -147,14 +147,14 @@ class BaseQueryChinookTests(object):
         tbl_track = self.tables["Track"]
         
         with self.assertRaises(QueryError):
-            self.db.query(tbl_track.getColumn("GenreId"), Count_(tbl_track.getColumn("TrackId")).as_("TrackCount"))\
-                .having(Count_(tbl_track.getColumn("TrackId")) > 25).get()
+            self.db.query(tbl_track.columns["GenreId"], Count_(tbl_track.columns["TrackId"]).as_("TrackCount"))\
+                .having(Count_(tbl_track.columns["TrackId"]) > 25).get()
     
     def test_orderByAsc(self):
         tbl_artist = self.tables["Artist"]
         
-        q = self.db.query(tbl_artist.getColumn("Name"))\
-            .order_by(tbl_artist.getColumn("Name")).get()
+        q = self.db.query(tbl_artist.columns["Name"])\
+            .order_by(tbl_artist.columns["Name"]).get()
         
         rows = q.execute()
         prev_name = rows[0].Name
@@ -165,8 +165,8 @@ class BaseQueryChinookTests(object):
     def test_orderByDesc(self):
         tbl_artist = self.tables["Artist"]
         
-        q = self.db.query(tbl_artist.getColumn("Name"))\
-            .order_by(tbl_artist.getColumn("Name"), ascending=False).get()
+        q = self.db.query(tbl_artist.columns["Name"])\
+            .order_by(tbl_artist.columns["Name"], ascending=False).get()
         
         rows = q.execute()
         prev_name = rows[0].Name
@@ -205,7 +205,7 @@ class BaseQueryChinookTests(object):
         
         tbl_track = self.tables["Track"]
         
-        q = self.db.query(tbl_track.getColumn("Name")).get()
+        q = self.db.query(tbl_track.columns["Name"]).get()
         
         rows = q.execute(limit=limit_amount)
         self.assertLessEqual(len(rows), limit_amount,
@@ -215,11 +215,11 @@ class BaseQueryChinookTests(object):
         limit_amount = 100
         tbl_track = self.tables["Track"]
         
-        q0 = self.db.query(tbl_track.getColumn("TrackId"))\
-            .order_by(tbl_track.getColumn("TrackId"))\
+        q0 = self.db.query(tbl_track.columns["TrackId"])\
+            .order_by(tbl_track.columns["TrackId"])\
             .get()
-        q1 = self.db.query(tbl_track.getColumn("TrackId"))\
-            .order_by(tbl_track.getColumn("TrackId"))\
+        q1 = self.db.query(tbl_track.columns["TrackId"])\
+            .order_by(tbl_track.columns["TrackId"])\
             .get()
         
         id_set = set(r.TrackId for r in q0.execute(limit=limit_amount))
@@ -237,11 +237,11 @@ class BaseQueryChinookTests(object):
         album_id = 73
         tbl_track = self.tables["Track"]
         
-        q0 = self.db.query(tbl_track.getColumn("GenreId"))\
-            .where(tbl_track.getColumn("AlbumId") == album_id).get()
+        q0 = self.db.query(tbl_track.columns["GenreId"])\
+            .where(tbl_track.columns["AlbumId"] == album_id).get()
         
-        q1 = self.db.query(tbl_track.getColumn("GenreId"))\
-            .where(tbl_track.getColumn("AlbumId") == album_id)\
+        q1 = self.db.query(tbl_track.columns["GenreId"])\
+            .where(tbl_track.columns["AlbumId"] == album_id)\
             .distinct().get()
         
         genres0 = set(row.GenreId for row in q0.execute())
@@ -259,7 +259,7 @@ class BaseQueryChinookTests(object):
         
         q = self.db.query(
             tbl_joinAlbumTrack.left,
-            tbl_joinAlbumTrack.right.getColumn("Name")).get()
+            tbl_joinAlbumTrack.right["Name"]).get()
         
         for row in q.execute():
             self.assertEqual(4, len(row))
@@ -275,8 +275,8 @@ class BaseQueryChinookTests(object):
         tbl_leftJoinTrackPlaylistTrack = LeftJoin(tbl_track, tbl_playlist_track, using=["TrackId"])
         
         q = self.db.query(
-            tbl_leftJoinTrackPlaylistTrack.left.getColumn("TrackId"),
-            tbl_leftJoinTrackPlaylistTrack.right.getColumn("PlaylistId")
+            tbl_leftJoinTrackPlaylistTrack.left["TrackId"],
+            tbl_leftJoinTrackPlaylistTrack.right["PlaylistId"]
         ).get()
         
         num_tracks = len(self.db.query(tbl_track.columns["TrackId"]).distinct().get().execute())
@@ -295,8 +295,8 @@ class BaseQueryChinookTests(object):
         tbl_rightJoinTrackGenre = RightJoin(tbl_track, tbl_genre, using=["GenreId"])
         
         q = self.db.query(
-            tbl_rightJoinTrackGenre.left.getColumn("TrackId"),
-            tbl_rightJoinTrackGenre.right.getColumn("GenreId")
+            tbl_rightJoinTrackGenre.left["TrackId"],
+            tbl_rightJoinTrackGenre.right["GenreId"]
         ).get()
         
         num_genres = len(self.db.query(tbl_genre.columns["GenreId"]).distinct().get().execute())
@@ -315,8 +315,8 @@ class BaseQueryChinookTests(object):
         tbl_rightJoinTrackGenre = FullJoin(tbl_track, tbl_genre, using=["GenreId"])
         
         q = self.db.query(
-            tbl_rightJoinTrackGenre.left.getColumn("TrackId"),
-            tbl_rightJoinTrackGenre.right.getColumn("GenreId")
+            tbl_rightJoinTrackGenre.left["TrackId"],
+            tbl_rightJoinTrackGenre.right["GenreId"]
         ).get()
         
         num_tracks = len(self.db.query(tbl_track.columns["TrackId"]).distinct().get().execute())
@@ -360,13 +360,13 @@ class BaseQueryChinookTests(object):
         tbl_track = self.tables["Track"]
         
         tbl_joinAlbumTrack = InnerJoin(tbl_album, tbl_track,
-            on=[Equal_(tbl_album.getColumn("AlbumId"), tbl_track.getColumn("AlbumId"))]
+            on=[Equal_(tbl_album.columns["AlbumId"], tbl_track.columns["AlbumId"])]
         )
         
         q = self.db.query(
             tbl_joinAlbumTrack.left,
-            tbl_joinAlbumTrack.right.getColumn("AlbumId").as_("TrackAlbumId"),
-            tbl_joinAlbumTrack.right.getColumn("Name")).get()
+            tbl_joinAlbumTrack.right["AlbumId"].as_("TrackAlbumId"),
+            tbl_joinAlbumTrack.right["Name"]).get()
         
         for row in q.execute():
             self.assertEqual(5, len(row))
@@ -386,10 +386,10 @@ class BaseQueryChinookTests(object):
         tbl_joinArtistAlbumTrack = InnerJoin(tbl_artist, tbl_joinAlbumTrack, using=["ArtistId"])
         
         q = self.db.query(
-            tbl_joinArtistAlbumTrack.tables["Artist"].getColumn("ArtistId"),
-            tbl_joinArtistAlbumTrack.tables["Album"].getColumn("ArtistId").as_("AlbumArtistId"),
-            tbl_joinArtistAlbumTrack.tables["Album"].getColumn("AlbumId"),
-            tbl_joinArtistAlbumTrack.tables["Track"].getColumn("Name").as_("TrackName")
+            tbl_joinArtistAlbumTrack.tables["Artist"]["ArtistId"],
+            tbl_joinArtistAlbumTrack.tables["Album"]["ArtistId"].as_("AlbumArtistId"),
+            tbl_joinArtistAlbumTrack.tables["Album"]["AlbumId"],
+            tbl_joinArtistAlbumTrack.tables["Track"]["Name"].as_("TrackName")
         ).get()
         
         for row in q.execute():
@@ -410,8 +410,8 @@ class BaseQueryChinookTests(object):
         
         genre_id_param = Value(genre1_id, param_name="genre_id")
         
-        q = self.db.query(tbl_track.getColumn("GenreId"))\
-            .where(tbl_track.getColumn("GenreId") == genre_id_param)\
+        q = self.db.query(tbl_track.columns["GenreId"])\
+            .where(tbl_track.columns["GenreId"] == genre_id_param)\
             .get()
         
         # Assertion checks that the where condition has been applied to
