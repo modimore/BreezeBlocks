@@ -12,10 +12,9 @@ class TableExpression(object):
     """Any object that can be used as a from field in a SQL query."""
     
     def get_name(self):
-        """Should return a string that refers to the table as a user might.
+        """Provides a way for a user to get a name to identify the table with.
         
-        The name this returns will be used to provide named access to tables
-        that are part of joins.
+        :return: A user-facing name for the table
         """
         raise NotImplementedError()
     

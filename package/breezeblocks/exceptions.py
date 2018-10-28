@@ -57,6 +57,7 @@ class QueryError(BreezeBlocksError):
         return "BreezeBlocks Query Error: {}".format(self._message)
 
 class InsertError(BreezeBlocksError):
+    """An error occuring during creation of a insert statement."""
     def __init__(self, message):
         self._message = message
     
@@ -64,6 +65,7 @@ class InsertError(BreezeBlocksError):
         return "BreezeBlocks Insert Error: {}".format(self._message)
 
 class UpdateError(BreezeBlocksError):
+    """An error occuring during creation of a update statement."""
     def __init__(self, message):
         self._message = message
     
@@ -71,6 +73,7 @@ class UpdateError(BreezeBlocksError):
         return "BreezeBlocks Update Error: {}".format(self._message)
 
 class DeleteError(BreezeBlocksError):
+    """An error occuring during creation of a delete statement."""
     def __init__(self, message):
         self._message = message
     
@@ -78,6 +81,7 @@ class DeleteError(BreezeBlocksError):
         return "BreezeBlocks Delete Error: {}".format(self._message)
 
 class MissingColumnError(BreezeBlocksError):
+    """An error raise when trying to find a column that does not exist."""
     def __init__(self, column_name, table=None):
         self._column_name = column_name
         self._table = table

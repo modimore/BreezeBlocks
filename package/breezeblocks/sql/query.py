@@ -4,11 +4,12 @@ from ..exceptions import QueryError, MissingColumnError
 
 from .column import AliasedColumnExpr
 from .column_collection import ColumnCollection
-from .expressions import _ValueExpr
+from .expressions import ValueExpr
 from .query_components import TableExpression
+from .statement import Statement
 from .table import AliasedTableExpression
 
-class Query(TableExpression):
+class Query(Statement, TableExpression):
     """Represents a database query.
     
     This can be executed to fetch rows from the corresponding database, or it
@@ -16,8 +17,7 @@ class Query(TableExpression):
     """
     
     def __init__(self, spec, statement, params, db=None):
-        """Initializes a query against a specific database.
-        
+        """
         :param db: The database to perform the query on.
         :param spec: The spec for the expressions used to build this query.
         :param statement: The generated SQL this query represents.
@@ -39,6 +39,7 @@ class Query(TableExpression):
     
     @property
     def columns(self):
+        """A :class:`.ColumnCollection` instance containing all columns in this table."""
         return self._columns
     
     def execute(self, limit=None, offset=None, conn=None):
@@ -75,19 +76,33 @@ class Query(TableExpression):
         return [ self._process_result(r) for r in results ]
     
     def set_param(self, param_key, value):
+        """Sets a bound parameter for the query.
+        
+        :param param_key: The identifier of the parameter to set.
+        :param value: The value to assign to the parameter.
+        """
         return self._params.set_param_value(param_key, value)
     
     def show(self):
-        """Show the constructed SQL statement for this query."""
         print(self._statement, self._params.get_dbapi_params(), sep="\n")
     
     def get_column(self, key):
+        """Gets a specific column in the table.
+        
+        :param name: The name of the column to get.
+        
+        :return: The corresponding :class:`.ColumnExpr`
+        """
         return self._get_column(key)
     
     def get_name(self):
         return self._name
     
     def as_(self, alias):
+        """Creates an aliased version of this query for use in other queries.
+        
+        :return: An :class:`.AliasedQuery` corresponding to this query.
+        """
         return AliasedQuery(self, alias)
     
     def _process_result(self, r):
@@ -139,7 +154,7 @@ class AliasedQuery(AliasedTableExpression):
         else:
             return False
 
-class _QueryColumn(_ValueExpr):
+class _QueryColumn(ValueExpr):
     """Represents a column from a non-aliased query.
     
     Columns from non-aliased queries behave subtly differently than most

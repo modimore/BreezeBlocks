@@ -8,7 +8,7 @@ are used in python operators on expression classes.
 """
 from .query_components import Referenceable, Selectable
 
-class _ValueExpr(Referenceable, Selectable):
+class ValueExpr(Referenceable, Selectable):
     """An expression that can be used by a BreezeBlocks `Query`.
     
     Using this as a base class for query-bound expressions
@@ -17,7 +17,11 @@ class _ValueExpr(Referenceable, Selectable):
     
     Several Built-in methods on this class do not return the
     Python-intuitive value, but an operation from operators
-    that can be used in query-building.
+    that can be used in query-building. For instance, the
+    Python + operator applied to two of these results in a
+    :class:`Plus_` instance for the left and right operands
+    and the operator will be applied in SQL for whatever meaning
+    it has.
     """
     
     def __init__(self):
@@ -41,7 +45,7 @@ class _ValueExpr(Referenceable, Selectable):
         raise NotImplementedError()
     
     def as_(self, alias):
-        """Returns an aliased version of this expression."""
+        """:return: An aliased version of this expression."""
         return _AliasedExpr(self, alias)
     
     # Comparisons
@@ -92,9 +96,7 @@ class _ValueExpr(Referenceable, Selectable):
 class _AliasedExpr(Selectable):
     """An expression using an alias to change its visible name.
     
-    The underlying expression can be anything deriving from
-    :class:`_ValueExpr` and providing a :meth:`_ref_field` method that
-    returns a string.
+    The underlying expression can be any :class:`.Selectable`.
     """
     
     def __init__(self, expr, alias):
@@ -117,7 +119,7 @@ class _AliasedExpr(Selectable):
     def _get_tables(self):
         return self._expr._get_tables()
 
-class Value(_ValueExpr):
+class Value(ValueExpr):
     """A constant value or literal for safe use in a query.
     
     This is meant to be used as a bound parameter for SQL statements
@@ -165,14 +167,14 @@ class ConstantExpr(Value):
     pass
 
 def _fix_expression(expr):
-    if isinstance(expr, _ValueExpr):
+    if isinstance(expr, ValueExpr):
         return expr
     else:
         return Value(expr)
 
 # Abstract Operators start here.
 
-class _Operator(_ValueExpr):
+class _Operator(ValueExpr):
     """SQL operator base class."""
     
     def __init__(self):

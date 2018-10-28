@@ -84,6 +84,14 @@ breezeblocks.sql.query\_components module
     :undoc-members:
     :show-inheritance:
 
+breezeblocks.sql.statement module
+---------------------------------
+
+.. automodule:: breezeblocks.sql.statement
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 breezeblocks.sql.table module
 -----------------------------
 

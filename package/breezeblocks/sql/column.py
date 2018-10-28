@@ -1,7 +1,7 @@
 """Provides a column class and an expression for using columns in queries."""
-from .expressions import _ValueExpr
+from .expressions import ValueExpr
 
-class ColumnExpr(_ValueExpr):
+class ColumnExpr(ValueExpr):
     """Represents a database column."""
     
     def __init__(self, name, table):
@@ -39,7 +39,7 @@ class ColumnExpr(_ValueExpr):
         """
         return AliasedColumnExpr(alias, self)
 
-class AliasedColumnExpr(_ValueExpr):
+class AliasedColumnExpr(ValueExpr):
     """A column with an alias used in querying."""
     
     def __init__(self, alias, column):
@@ -54,7 +54,7 @@ class AliasedColumnExpr(_ValueExpr):
     
     @property
     def full_name(self):
-        """Returns the full name of the underlying column."""
+        """The full name of the underlying column."""
         return self.column.full_name
     
     def _get_name(self):

@@ -1,8 +1,8 @@
 """SQL Aggregate functions."""
 from .query_components import Selectable
-from .expressions import _ValueExpr, _AliasedExpr
+from .expressions import ValueExpr, _AliasedExpr
 
-class _Aggregator(_ValueExpr):
+class _Aggregator(ValueExpr):
     """A SQL aggregator function.
     
     Calculates an aggregated value from the given expression for all rows
@@ -86,4 +86,5 @@ class RecordCount(Selectable):
         return tuple()
     
     def as_(self, alias):
+        """:return: An aliased version of this expression."""
         return _AliasedExpr(self, alias)

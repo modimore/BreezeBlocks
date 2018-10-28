@@ -48,7 +48,9 @@ class ColumnCollection(object):
             raise KeyError
     
     def get_column(self, key):
+        """:return: The specified column from the collection."""
         return self._get_column(key)
     
     def get_names(self):
+        """:return: The names of all columns in the collection."""
         return self._column_names

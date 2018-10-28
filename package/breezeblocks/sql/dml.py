@@ -2,8 +2,9 @@ from ..exceptions import InsertError, UpdateError, DeleteError
 from .expressions import Value
 from .param_store import get_param_store
 from .query import Query
+from .statement import Statement
 
-class Insert(object):
+class Insert(Statement):
     """Represents a database insert.
     
     This can be used to insert data either from your python processes or from
@@ -59,7 +60,6 @@ class Insert(object):
             conn.close()
     
     def show(self):
-        """Show the constructed SQL for this insert statement."""
         if self._db._dbapi.paramstyle == "qmark":
             param_marker = "?"
         elif self._db._dbapi.paramstyle in ["format", "pyformat"]:
@@ -95,7 +95,7 @@ class Insert(object):
         
         cur.executemany(statement, param_data)
 
-class Update(object):
+class Update(Statement):
     """Represents a database update."""
     
     def __init__(self, statement, params, db=None):
@@ -113,11 +113,6 @@ class Update(object):
         self._params = params
     
     def execute(self, conn=None):
-        """Executes the update in the database.
-        
-        :param conn: Optional connection to use to execute this statement.
-          An update will get and put back a connection if this isn't provided.
-        """
         manage_conn = conn is None
         if manage_conn:
             conn = self._db.pool.get()
@@ -134,10 +129,9 @@ class Update(object):
         return self._params.set_param_value(param_key, value)
     
     def show(self):
-        """Show the constructed SQL statement for this update."""
         print(self._statement, self._params, sep="\n")
 
-class Delete(object):
+class Delete(Statement):
     """Represents a database delete."""
     
     def __init__(self, statement, params, db=None):
@@ -155,11 +149,6 @@ class Delete(object):
         self._params = params
     
     def execute(self, conn=None):
-        """Executes the delete in the database.
-        
-        :param conn: Optional connection to use to execute this statement.
-          A delete will get and put back a connection if this isn't provided.
-        """
         manage_conn = conn is None
         if manage_conn:
             conn = self._db.pool.get()
@@ -176,5 +165,4 @@ class Delete(object):
         return self._params.set_param_value(param_key, value)
     
     def show(self):
-        """Show the constructed SQL statement for this delete."""
         print(self._statement, self._params, sep="\n")

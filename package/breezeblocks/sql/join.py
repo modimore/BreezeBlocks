@@ -1,9 +1,9 @@
 from .query_components import TableExpression
-from .expressions import _ValueExpr
+from .expressions import ValueExpr
 from .column_collection import ColumnCollection
 from ..exceptions import QueryError
 
-class _JoinColumn(_ValueExpr):
+class _JoinColumn(ValueExpr):
     """A column used through a join expression."""
     
     def __init__(self, join_expr, column_expr):

@@ -8,7 +8,11 @@ class Table(TableExpression):
     """Represents a database table."""
     
     def __init__(self, table_name, column_names, schema=None):
-        """Initializes a table."""
+        """
+        :param table_name: The name of the table in the database.
+        :param column_names: A list of the names of columns in the table.
+        :param schema: The name of the schema the table is in. Optional.
+        """
         # Construct table's qualified name
         self.name = table_name
         if schema is not None:
@@ -34,7 +38,6 @@ class Table(TableExpression):
         
         :param other: The object to compare with this. If it is a table,
           their names are compared. If not, the comparison returns false.
-        
         :return: A boolean representing whether the two objects are equal.
         """
         if isinstance(other, Table):
@@ -56,12 +59,22 @@ class Table(TableExpression):
     
     @property
     def columns(self):
+        """A :class:`.ColumnCollection` instance containing all columns in this table."""
         return self._columns
     
-    def get_column(self, key):
-        return self._get_column(key)
+    def get_column(self, name):
+        """Gets a specific column in the table.
+        
+        :param name: The name of the column to get.
+        :return: The corresponding :class:`.ColumnExpr`
+        """
+        return self._get_column(name)
     
     def get_name(self):
+        """Gets the name of this table as used in the database.
+        
+        :return: The full name of this table.
+        """
         return self.name
     
     def _get_column(self, name):
@@ -81,6 +94,10 @@ class Table(TableExpression):
         return tuple()
     
     def as_(self, alias):
+        """Creates an aliased version of this table for use in queries.
+        
+        :return: An :class:`.AliasedTableExpression` corresponding to this table.
+        """
         return AliasedTableExpression(self, alias)
 
 class _TableColumnCollection(ColumnCollection):
@@ -131,12 +148,22 @@ class AliasedTableExpression(TableExpression):
     
     @property
     def columns(self):
+        """A :class:`.ColumnCollection` instance containing all columns in this table."""
         return self._columns
     
     def get_column(self, key):
+        """Gets a specific column in the table.
+        
+        :param name: The name of the column to get.
+        :return: The corresponding :class:`.ColumnExpr`
+        """
         return self._columns[key]
     
     def get_name(self):
+        """Gets the name of this table as used in the queries.
+        
+        :return: The alias of this table.
+        """
         return self.name
     
     def _get_from_field(self, param_store):
