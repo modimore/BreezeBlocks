@@ -5,8 +5,7 @@ from breezeblocks import Database
 
 from base_query_chinook_tests import BaseQueryChinookTests
 
-CONNECTION_STRING = "Driver=MariaDB;User ID={};Password={};Database=chinook".format(
-    os.getenv("MARIADBUSER"), os.getenv("MARIADBPASS"))
+CONNECTION_STRING = "DSN=Chinook_MariaDB"
 
 class MariaDBODBCTests(BaseQueryChinookTests, unittest.TestCase):
     """Tests using MariaDB through an ODBC adapter."""
