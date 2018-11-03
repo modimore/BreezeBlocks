@@ -1,5 +1,12 @@
 Version History
 ===============
+0.3.2
+-----
+Tables and other table expressions now provide attribute access and item
+access to columns by name. An issue with joins known to cause problems
+when querying against Postgres has been fixed. What can be imported from
+the breezeblocks and breezeblocks.sql packages has changed.
+
 0.3.1
 -----
 Query Builders can be cloned now, allowing you to fork the state for similar
