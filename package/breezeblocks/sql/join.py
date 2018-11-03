@@ -149,7 +149,7 @@ class _QualifiedJoin(_Join):
         self._using_fields = using
     
     def _get_from_field(self, param_store):
-        return self._get_join_expression(param_store) + " " + self._get_join_condition(param_store)
+        return "(" + self._get_join_expression(param_store) + " " + self._get_join_condition(param_store) + ")"
     
     def _get_join_condition(self, param_store):
         if self._on_exprs is not None:
@@ -168,33 +168,33 @@ class CrossJoin(_Join):
         return self._get_join_expression(param_store)
     
     def _get_join_expression(self, param_store):
-        return "({}) CROSS JOIN ({})".format(
+        return "{} CROSS JOIN {}".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class InnerJoin(_QualifiedJoin):
     """Represents an inner join of two table expressions."""
     
     def _get_join_expression(self, param_store):
-        return "({}) INNER JOIN ({})".format(
+        return "{} INNER JOIN {}".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class LeftJoin(_QualifiedJoin):
     """Represents a left outer join of two table expressions."""
     
     def _get_join_expression(self, param_store):
-        return "({}) LEFT JOIN ({})".format(
+        return "{} LEFT JOIN {}".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class RightJoin(_QualifiedJoin):
     """Represents a right outer join of two table expressions."""
     
     def _get_join_expression(self, param_store):
-        return "({}) RIGHT JOIN ({})".format(
+        return "{} RIGHT JOIN {}".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))
 
 class FullJoin(_QualifiedJoin):
     """Represents a full outer join of two table expressions."""
     
     def _get_join_expression(self, param_store):
-        return "({}) FULL JOIN ({})".format(
+        return "{} FULL JOIN {}".format(
             self._left._get_from_field(param_store), self._right._get_from_field(param_store))
